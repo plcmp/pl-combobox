@@ -1,0 +1,33 @@
+{
+    "name": "@plcmp/pl-combobox",
+    "version": "0.0.1",
+    "description": "Simple combobox component.",
+    "main": "pl-combobox.js",
+    "repository": {
+        "url": "https://github.com/plcmp/pl-combobox.git"
+    },
+    "license": "MIT",
+    "type": "module",
+    "author": {
+        "name": "Azat Yamalov",
+        "email": "yamalov.azat@live.com"
+    },
+    "contributors": [
+        {
+            "name": "Dmitry Boikov",
+            "email": "boikovdv@gmail.com"
+        },
+        {
+            "name": "Andrey Maksimov",
+            "email": "andrmaxmail@gmail.com"
+        }
+    ],
+    "dependencies": {
+        "polylib": "^1.0.0",
+        "@plcmp/pl-dropdown": "^0.0.1",
+        "@plcmp/pl-icon": "^0.0.1",
+        "@plcmp/pl-iconset-default": "^0.0.1",
+        "@plcmp/pl-input": "^0.0.1",
+        "@plcmp/pl-repeat": "^0.0.1"
+    }
+}
