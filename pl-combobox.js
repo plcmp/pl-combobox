@@ -75,8 +75,8 @@ class PlCombobox extends PlElement {
     static get template() {
         return html`
 			<pl-input disabled="{{disabled}}" id="input" placeholder="[[placeholder]]" value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" variant="[[variant]]" on-click="[[_onToggle]]">
-                <pl-icon hidden$="[[!value]]" slot="suffix" iconset="pl-default" size="16" icon="close" on-click="[[_onClearClick]]"></pl-icon>
-                <pl-icon slot="suffix" iconset="pl-default" size="16" icon="chevron-down"></pl-icon>
+                <pl-icon hidden$="[[!value]]" slot="suffix" iconset="pl-default" size="16" icon="close-s" on-click="[[_onClearClick]]"></pl-icon>
+                <pl-icon slot="suffix" iconset="pl-default" size="16" icon="chevron-down-s"></pl-icon>
             </pl-input>
 			<pl-dropdown id="dd" opened="{{_ddOpened}}">
                 <pl-repeat items="[[_filterData(data, text, _search)]]">

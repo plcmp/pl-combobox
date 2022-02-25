@@ -1,6 +1,6 @@
 {
     "name": "@plcmp/pl-combobox",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Simple combobox component.",
     "main": "pl-combobox.js",
     "repository": {
@@ -24,10 +24,10 @@
     ],
     "dependencies": {
         "polylib": "^1.0.0",
-        "@plcmp/pl-dropdown": "^0.0.1",
+        "@plcmp/pl-dropdown": "^0.0.2",
         "@plcmp/pl-icon": "^0.0.1",
-        "@plcmp/pl-iconset-default": "^0.0.1",
-        "@plcmp/pl-input": "^0.0.1",
+        "@plcmp/pl-iconset-default": "^0.0.2",
+        "@plcmp/pl-input": "^0.0.2",
         "@plcmp/pl-repeat": "^0.0.1"
     }
 }
