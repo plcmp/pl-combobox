@@ -16,11 +16,14 @@ class PlCombobox extends PlElement {
             label: { type: String },
             required: { type: Boolean },
             invalid: { type: Boolean },
-            variant: { type: String },
+            variant: { type: String, variant: 'vertical', reflectToAttribute: true },
+            stretch: { type: Boolean, reflectToAttribute: true },
             placeholder: { type: String },
             textProperty: { type: String, value: 'text' },
             valueProperty: { type: String, value: 'value' },
-            disabled: { type: Boolean },
+            disabled: { type: Boolean, reflectToAttribute: true },
+            stretch: { type: Boolean, reflectToAttribute: true },
+            hidden: { type: Boolean, reflectToAttribute: true },
             _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
             _search: { type: Boolean, value: false }
         };
@@ -28,6 +31,28 @@ class PlCombobox extends PlElement {
 
     static get css() {
         return css`
+            :host {
+                display: flex;
+                outline: none;
+                width: var(--content-width)
+            }
+
+            :host([hidden]) {
+                display: none;
+            }
+
+            :host([variant=horizontal]) {
+                width: calc(var(--label-width) + var(--content-width));
+            }
+
+            :host([stretch]) {
+                width: 100%;
+            }
+
+            pl-input {
+                width: 100%;
+            }
+
 			pl-icon {
 				cursor: pointer;
                 --pl-icon-fill-color: none;
