@@ -15,6 +15,7 @@ class PlCombobox extends PlElement {
             selected: { type: Object, observer: '_selectedObserver' },
             label: { type: String },
             required: { type: Boolean },
+            readonly: { type: Boolean },
             invalid: { type: Boolean },
             variant: { type: String, variant: 'vertical', reflectToAttribute: true },
             stretch: { type: Boolean, reflectToAttribute: true },
@@ -55,33 +56,32 @@ class PlCombobox extends PlElement {
 
 			pl-icon {
 				cursor: pointer;
-                --pl-icon-fill-color: none;
-                --pl-icon-stroke-color: var(--grey-dark);
+                --pl-icon-fill-color: var(--grey-dark);
 			}
 
 
 			pl-icon:hover {
-                --pl-icon-stroke-color: var(--black-light);
+                --pl-icon-fill-color: var(--text-color);
 			}
 
             pl-dropdown {
-                border-radius: 4px;
+                background: var(--surface-color);
+                border-radius: var(--border-radius);
+                box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
                 max-height: 254px;
                 min-width: var(--content-width);
                 box-sizing: border-box;
-                margin: 0px;
-                --dropdown-padding: 0px;
                 overflow: auto;
+                padding: var(--space-md) 0;
             }
 
             .comboitem {
                 box-sizing: border-box;
-                padding: 8px;
-                min-height: 32px;
+                padding: 0 var(--space-sm);
+                min-height: var(--base-size-md);
                 width: 100%;
-                font: var(--font-md);
-                line-height: 150%;
-                color: var(--black-light);
+                font: var(--text-font);
+                color: var(--text-color);
                 display: flex;
                 align-items: center;
                 cursor: pointer;
@@ -99,7 +99,7 @@ class PlCombobox extends PlElement {
 
     static get template() {
         return html`
-			<pl-input disabled="{{disabled}}" id="input" placeholder="[[placeholder]]" value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" variant="[[variant]]" on-click="[[_onToggle]]">
+			<pl-input readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]" value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" variant="[[variant]]" on-click="[[_onToggle]]">
                 <slot name="prefix" slot="prefix"></slot>
                 <slot name="suffix" slot="suffix"></slot>
                 <pl-icon hidden="[[!value]]" slot="suffix" iconset="pl-default" size="16" icon="close-s" on-click="[[_onClearClick]]"></pl-icon>
