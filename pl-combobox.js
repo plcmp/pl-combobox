@@ -23,10 +23,10 @@ class PlCombobox extends PlElement {
             textProperty: { type: String, value: 'text' },
             valueProperty: { type: String, value: 'value' },
             disabled: { type: Boolean, reflectToAttribute: true },
-            stretch: { type: Boolean, reflectToAttribute: true },
             hidden: { type: Boolean, reflectToAttribute: true },
             _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
-            _search: { type: Boolean, value: false }
+            _search: { type: Boolean, value: false },
+            allowCustomValue: { type: Boolean, value: false }
         };
     }
 
@@ -204,9 +204,9 @@ class PlCombobox extends PlElement {
     _valueObserver(newValue, oldValue, mut) {
         if (this.inStack) { return; }
 
-        let finded;
+        let found;
         if (this.data) {
-            finded = this.data.find((item, index) => {
+            found = this.data.find((item, index) => {
                 const value = item[this.valueProperty];
                 if (value == newValue) {
                     this.selected = item;
@@ -215,7 +215,7 @@ class PlCombobox extends PlElement {
                 }
             });
         }
-        if (!finded) {
+        if (!found) {
             if (this.allowCustomValue || newValue === null || newValue === undefined) {
                 this.__setText(newValue);
             } else {
