@@ -1,10 +1,13 @@
 import { PlElement, html, css } from "polylib";
 
+import './pl-combobox-list.js';
+
 import '@plcmp/pl-dropdown';
 import '@plcmp/pl-icon';
 import '@plcmp/pl-iconset-default';
 import '@plcmp/pl-input';
-import '@plcmp/pl-repeat';
+import '@plcmp/pl-dom-if';
+import "@plcmp/pl-checkbox";
 
 class PlCombobox extends PlElement {
     static get properties() {
@@ -26,7 +29,13 @@ class PlCombobox extends PlElement {
             hidden: { type: Boolean, reflectToAttribute: true },
             _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
             _search: { type: Boolean, value: false },
-            allowCustomValue: { type: Boolean, value: false }
+            allowCustomValue: { type: Boolean, value: false },
+            multiSelect: { type: Boolean, value: false },
+            tree: { type: Boolean, value: false },
+            selectOnlyLeaf: { type: Boolean, value: false },
+            keyProperty: { type: String, value: 'text' },
+            parentProperty: { type: String, value: 'value' },
+            _rowTemplate: { type: Object }
         };
     }
 
@@ -35,22 +44,13 @@ class PlCombobox extends PlElement {
             :host {
                 display: flex;
                 outline: none;
-                width: var(--content-width)
             }
 
             :host([hidden]) {
                 display: none;
             }
 
-            :host([variant=horizontal]) {
-                width: calc(var(--label-width) + var(--content-width));
-            }
-
             :host([stretch]) {
-                width: 100%;
-            }
-
-            pl-input {
                 width: 100%;
             }
 
@@ -59,10 +59,13 @@ class PlCombobox extends PlElement {
                 --pl-icon-fill-color: var(--grey-dark);
 			}
 
-
 			pl-icon:hover {
                 --pl-icon-fill-color: var(--text-color);
 			}
+
+            pl-icon[hidden] {
+                display:none !important;
+            }
 
             pl-dropdown {
                 background: var(--surface-color);
@@ -74,53 +77,30 @@ class PlCombobox extends PlElement {
                 overflow: auto;
                 padding: var(--space-md) 0;
             }
-
-            .comboitem {
-                box-sizing: border-box;
-                padding: 0 var(--space-sm);
-                min-height: var(--base-size-md);
-                width: 100%;
-                font: var(--text-font);
-                color: var(--text-color);
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-            }
-
-            .comboitem:hover {
-                background-color: var(--grey-lightest)
-            }
-
-            pl-icon[hidden] {
-                display: none;
-            }
     	`;
     }
 
     static get template() {
         return html`
-			<pl-input readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]" value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" variant="[[variant]]" on-click="[[_onToggle]]">
+            <pl-input stretch readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]" value="{{text}}"
+                required="[[required]]" invalid="{{invalid}}" label="[[label]]" variant="[[variant]]" on-click="[[_onToggle]]">
                 <slot name="prefix" slot="prefix"></slot>
                 <slot name="suffix" slot="suffix"></slot>
-                <pl-icon hidden="[[!value]]" slot="suffix" iconset="pl-default" size="16" icon="close-s" on-click="[[_onClearClick]]"></pl-icon>
+                <pl-icon hidden="[[!value]]" slot="suffix" iconset="pl-default" size="16" icon="close-s"
+                    on-click="[[_onClearClick]]"></pl-icon>
                 <pl-icon iconset="pl-default" slot="suffix" size="16" icon="chevron-down-s"></pl-icon>
             </pl-input>
-			<pl-dropdown id="dd" opened="{{_ddOpened}}">
-                <pl-repeat items="[[_filterData(data, text, _search)]]">
+            <pl-dropdown id="dd" opened="{{_ddOpened}}">
+                <pl-dom-if if="{{_ddOpened}}">
                     <template>
-                        <div class="comboitem" on-click="[[_onSelect]]">
-                            <div inner-h-t-m-l="[[_itemText(item, text, _search, _ddOpened)]]"></div>
-                        </div>
+                        <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]" data="[[data]]"
+                            text-property="[[textProperty]]" value-property="[[valueProperty]]" _search="[[_search]]"
+                            selected="{{selected}}" _ddOpened="[[_ddOpened]]" on-select="[[_onSelect]]" text="[[text]]">
+                        </pl-combobox-list>
                     </template>
-                </pl-repeat>
-			</pl-dropdown>
-
+                </pl-dom-if>
+            </pl-dropdown>
 		`;
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        this.$.input.validators.push(this.validator.bind(this));
     }
 
     _selectedObserver(item) {
@@ -274,48 +254,12 @@ class PlCombobox extends PlElement {
         }
     }
 
-    _filterData(data, text, _search) {
-        let res = data;
-
-        if (_search && text) {
-            const fltr = this.caseSensetiveFilter ? text : text.toLowerCase();
-            res = this.data ? this.data.filter(item => {
-                const i = item[this.textProperty];
-                return i && (this.caseSensetiveFilter ? i.indexOf(fltr) : i.toLowerCase().indexOf(fltr)) !== -1;
-            }) : [];
-        }
-
-        return res;
-    }
-
-    _itemText(item, text, _search, _ddOpened) {
-        let res;
-        if (text) {
-            if (_search) {
-                /**
-                 * Данное условие отрабатывает во время поиска необходимой записи в combobox (когда производится ввод/вставка символов в input)
-                 */
-                const txtPart = item[this.textProperty].match(new RegExp(text, 'i'));
-                res = txtPart && item[this.textProperty].replace(new RegExp(text, 'i'), `<b>${txtPart[0]}</b>`);
-            } else {
-                /**
-                 * Отображает выбранную запись в списке, как помеченную. Остальные же отображаются стандартным текстом.
-                 */
-                res = (this.selected === item) ? `<b>${item[this.textProperty]}</b>` : item[this.textProperty];
-            }
-        } else {
-            res = item[this.textProperty]
-        }
-        return res;
-    }
-
     _onSelect(event) {
-
         this._search = false;
-        this.__setValue(event.model.item[this.valueProperty]);
-        this.__setText(event.model.item[this.textProperty]);
+        this.__setValue(event.detail.model[this.valueProperty]);
+        this.__setText(event.detail.model[this.textProperty]);
         this._ddOpened = false;
-        this.selected = event.model.item;
+        this.selected = event.detail.model;
     }
 
 }
