@@ -17,24 +17,28 @@ class PlCombobox extends PlElement {
             text: { type: String, observer: '_textObserver' },
             selected: { type: Object, observer: '_selectedObserver' },
             label: { type: String },
+
             required: { type: Boolean },
             readonly: { type: Boolean },
             invalid: { type: Boolean },
-            variant: { type: String, variant: 'vertical', reflectToAttribute: true },
+            variant: { type: String },
+            
+            orientation: { type: String },
             stretch: { type: Boolean, reflectToAttribute: true },
             placeholder: { type: String },
-            textProperty: { type: String, value: 'text' },
-            valueProperty: { type: String, value: 'value' },
+            textProperty: { type: String, value: 'caption' },
+            valueProperty: { type: String, value: 'id' },
             disabled: { type: Boolean, reflectToAttribute: true },
             hidden: { type: Boolean, reflectToAttribute: true },
+            
             _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
             _search: { type: Boolean, value: false },
             allowCustomValue: { type: Boolean, value: false },
             multiSelect: { type: Boolean, value: false },
             tree: { type: Boolean, value: false },
             selectOnlyLeaf: { type: Boolean, value: false },
-            keyProperty: { type: String, value: 'text' },
-            parentProperty: { type: String, value: 'value' },
+            keyProperty: { type: String },
+            parentProperty: { type: String },
             _rowTemplate: { type: Object }
         };
     }
@@ -42,8 +46,7 @@ class PlCombobox extends PlElement {
     static get css() {
         return css`
             :host {
-                display: flex;
-                outline: none;
+                display: inline-block;
             }
 
             :host([hidden]) {
@@ -52,19 +55,6 @@ class PlCombobox extends PlElement {
 
             :host([stretch]) {
                 width: 100%;
-            }
-
-			pl-icon {
-				cursor: pointer;
-                --pl-icon-fill-color: var(--grey-dark);
-			}
-
-			pl-icon:hover {
-                --pl-icon-fill-color: var(--text-color);
-			}
-
-            pl-icon[hidden] {
-                display:none !important;
             }
 
             pl-dropdown {
@@ -82,25 +72,37 @@ class PlCombobox extends PlElement {
 
     static get template() {
         return html`
-            <pl-input stretch readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]" value="{{text}}"
-                required="[[required]]" invalid="{{invalid}}" label="[[label]]" variant="[[variant]]" on-click="[[_onToggle]]">
+            <pl-input stretch="[[stretch]]" readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]"
+                value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]"
+                on-click="[[_onToggle]]">
                 <slot name="prefix" slot="prefix"></slot>
                 <slot name="suffix" slot="suffix"></slot>
-                <pl-icon hidden="[[!value]]" slot="suffix" iconset="pl-default" size="16" icon="close-s"
-                    on-click="[[_onClearClick]]"></pl-icon>
-                <pl-icon iconset="pl-default" slot="suffix" size="16" icon="chevron-down-s"></pl-icon>
+                <slot name="label-prefix" slot="label-prefix"></slot>
+                <slot name="label-suffix" slot="label-suffix"></slot>
+                <pl-icon-button variant="link" hidden="[[!value]]" slot="suffix" iconset="pl-default" size="12" icon="close"
+                    on-click="[[_onClearClick]]"></pl-icon-button>
+                <pl-icon-button variant="link" iconset="pl-default" slot="suffix" size="16" icon="chevron-down"></pl-icon-button>
             </pl-input>
             <pl-dropdown id="dd" opened="{{_ddOpened}}">
                 <pl-dom-if if="{{_ddOpened}}">
                     <template>
-                        <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]" data="[[data]]"
-                            text-property="[[textProperty]]" value-property="[[valueProperty]]" _search="[[_search]]"
-                            selected="{{selected}}" _ddOpened="[[_ddOpened]]" on-select="[[_onSelect]]" text="[[text]]">
+                        <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
+                            data="[[data]]" text-property="[[textProperty]]" value-property="[[valueProperty]]"
+                            _search="[[_search]]" selected="{{selected}}" _ddOpened="[[_ddOpened]]" on-select="[[_onSelect]]"
+                            text="[[text]]">
                         </pl-combobox-list>
                     </template>
                 </pl-dom-if>
             </pl-dropdown>
 		`;
+    }
+
+    connectedCallback() {
+        super.connectedCallback()
+        if (this.variant) {
+            console.log('Variant is deprecated, use orientation instead');
+            this.orientation = this.variant;
+        }
     }
 
     _selectedObserver(item) {
@@ -181,7 +183,7 @@ class PlCombobox extends PlElement {
 
         event.stopImmediatePropagation();
     }
-    _valueObserver(newValue, oldValue, mut) {
+    _valueObserver(newValue) {
         if (this.inStack) { return; }
 
         let found;
@@ -261,7 +263,6 @@ class PlCombobox extends PlElement {
         this._ddOpened = false;
         this.selected = event.detail.model;
     }
-
 }
 
 customElements.define('pl-combobox', PlCombobox);

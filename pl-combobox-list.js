@@ -1,8 +1,7 @@
 import { html, PlElement, css } from "polylib";
 import '@plcmp/pl-virtual-scroll';
-import '@plcmp/pl-repeat';
 
-class PlListbox extends PlElement {
+class PlComboboxList extends PlElement {
     static get properties() {
         return {
             text: { type: String },
@@ -69,7 +68,7 @@ class PlListbox extends PlElement {
             <div id="ddContainer">
                 <template d:repeat="[[_filterData(data, text, _search)]]">
                     <div class="comboitem" on-click="[[_onSelect]]">
-                        <pl-checkbox hidden="[[!multiSelect]]" checked="[[_computeSelected(item,_selectedMap)]]" variant="horizontal"
+                        <pl-checkbox hidden="[[!multiSelect]]" checked="[[_computeSelected(item,_selectedMap)]]" orientation="horizontal"
                             on-click="[[_onCheckboxClick]]"></pl-checkbox>
                         <span class="tree-cell" style$="[[_getRowPadding(item)]]">
                             [[_getTreeIcon(item)]]
@@ -161,4 +160,4 @@ class PlListbox extends PlElement {
     }
 }
 
-customElements.define('pl-listbox', PlListbox);
+customElements.define('pl-combobox-list', PlComboboxList);
