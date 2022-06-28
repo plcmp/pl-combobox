@@ -5,6 +5,7 @@ import '@plcmp/pl-icon';
 import '@plcmp/pl-iconset-default';
 import '@plcmp/pl-input';
 import '@plcmp/pl-repeat';
+import '@plcmp/pl-dom-if';
 
 class PlCombobox extends PlElement {
     static get properties() {
@@ -106,14 +107,18 @@ class PlCombobox extends PlElement {
                 <pl-icon iconset="pl-default" slot="suffix" size="16" icon="chevron-down-s"></pl-icon>
             </pl-input>
 			<pl-dropdown id="dd" opened="{{_ddOpened}}">
-                <pl-repeat items="[[_filterData(data, text, _search)]]">
+                <pl-dom-if if="[[_ddOpened]]">
                     <template>
-                        <div class="comboitem" on-click="[[_onSelect]]">
-                            <div inner-h-t-m-l="[[_itemText(item, text, _search, _ddOpened)]]"></div>
-                        </div>
+                        <pl-repeat items="[[_filterData(data, text, _search)]]">
+                            <template>
+                                <div class="comboitem" on-click="[[_onSelect]]">
+                                    <div inner-h-t-m-l="[[_itemText(item, text, _search, _ddOpened)]]"></div>
+                                </div>
+                            </template>
+                        </pl-repeat>
                     </template>
-                </pl-repeat>
-			</pl-dropdown>
+                </pl-dom-if>
+            </pl-dropdown>
 
 		`;
     }
