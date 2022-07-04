@@ -5,6 +5,7 @@ class PlComboboxList extends PlElement {
     static get properties() {
         return {
             text: { type: String },
+            value: {  },
             data: { type: Array, value: () => [] },
             selected: { value: undefined },
             multiSelect: { type: Boolean },
@@ -14,9 +15,7 @@ class PlComboboxList extends PlElement {
             valueProperty: { type: String },
             keyProperty: { type: String, },
             parentProperty: { type: String },
-            _search: { type: String },
-            _ddOpened: { type: Boolean },
-            _selectedMap: { type: Map }
+            _search: { type: String }
         }
     };
 
@@ -45,6 +44,7 @@ class PlComboboxList extends PlElement {
                 display: flex;
                 align-items: center;
                 cursor: pointer;
+                gap: 8px;
             }
 
             .comboitem:hover {
@@ -54,12 +54,6 @@ class PlComboboxList extends PlElement {
             pl-icon[hidden] {
                 display: none;
             }
-
-            .tree-cell {
-                cursor: pointer;
-                width: var(--base-size-xs);
-                user-select: none;
-            }
         `;
     }
 
@@ -68,12 +62,8 @@ class PlComboboxList extends PlElement {
             <div id="ddContainer">
                 <template d:repeat="[[_filterData(data, text, _search)]]">
                     <div class="comboitem" on-click="[[_onSelect]]">
-                        <pl-checkbox hidden="[[!multiSelect]]" checked="[[_computeSelected(item,_selectedMap)]]" orientation="horizontal"
-                            on-click="[[_onCheckboxClick]]"></pl-checkbox>
-                        <span class="tree-cell" style$="[[_getRowPadding(item)]]">
-                            [[_getTreeIcon(item)]]
-                        </span>
-                        <div inner-h-t-m-l="[[_itemText(item, text, _search, _ddOpened)]]"></div>
+                        <pl-checkbox checked="[[_itemSelected(item, value)]]"></pl-checkbox>
+                        <div inner-h-t-m-l="[[_itemText(item, text, _search)]]"></div>
                     </div>
                 </template>
             </div>
@@ -94,21 +84,11 @@ class PlComboboxList extends PlElement {
         return res;
     }
 
-    _computeSelected(item) {
-        return this.multiSelect && this._selectedMap && this._selectedMap.has(item) || false;
+    _itemSelected(item, value) {
+        return this.multiSelect && value.includes(item[this.valueProperty]);
     }
 
-    _onCheckboxClick(event) {
-        let item = event.model.item;
-        if (!this._selectedMap.has(item)) {
-            this._selectedMap.set(item, item)
-        } else {
-            this._selectedMap.delete(item)
-        }
-    }
-
-
-    _itemText(item, text, _search, _ddOpened) {
+    _itemText(item, text, _search) {
         let res;
         if (text) {
             if (_search) {
@@ -135,13 +115,17 @@ class PlComboboxList extends PlElement {
     }
 
     _onSelect(event) {
-        if (!this.multiSelect)
-            this.dispatchEvent(new CustomEvent('select', {
-                detail: {
-                    model: event.model.item
-                },
-                bubbles: true
-            }));
+        let item = event.model.item;
+        if(this.multiSelect) {
+            item.__checked = !item.__checked;
+        }
+
+        this.dispatchEvent(new CustomEvent('select', {
+            detail: {
+                model: item
+            },
+            bubbles: true
+        }));
     }
 
     _getRowPadding(row) {
@@ -156,7 +140,7 @@ class PlComboboxList extends PlElement {
             return '';
         }
 
-        return row._opened ? '-' : '+';
+        return row._opened ? 'minus' : 'plus';
     }
 }
 

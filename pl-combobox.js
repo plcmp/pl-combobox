@@ -13,7 +13,7 @@ class PlCombobox extends PlElement {
     static get properties() {
         return {
             data: { type: Array, value: () => [], observer: '_dataObserver' },
-            value: { type: String, observer: '_valueObserver' },
+            value: { observer: '_valueObserver' },
             text: { type: String, observer: '_textObserver' },
             selected: { type: Object, observer: '_selectedObserver' },
             label: { type: String },
@@ -79,7 +79,7 @@ class PlCombobox extends PlElement {
                 <slot name="suffix" slot="suffix"></slot>
                 <slot name="label-prefix" slot="label-prefix"></slot>
                 <slot name="label-suffix" slot="label-suffix"></slot>
-                <pl-icon-button variant="link" hidden="[[!value]]" slot="suffix" iconset="pl-default" size="12" icon="close"
+                <pl-icon-button variant="link" hidden="[[_isClearHidden(value)]]" slot="suffix" iconset="pl-default" size="12" icon="close"
                     on-click="[[_onClearClick]]"></pl-icon-button>
                 <pl-icon-button variant="link" iconset="pl-default" slot="suffix" size="16" icon="chevron-down"></pl-icon-button>
             </pl-input>
@@ -88,8 +88,8 @@ class PlCombobox extends PlElement {
                     <template>
                         <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
                             data="[[data]]" text-property="[[textProperty]]" value-property="[[valueProperty]]"
-                            _search="[[_search]]" selected="{{selected}}" _ddOpened="[[_ddOpened]]" on-select="[[_onSelect]]"
-                            text="[[text]]">
+                            _search="[[_search]]" selected="{{selected}}" on-select="[[_onSelect]]"
+                            text="[[text]]" value="[[value]]">
                         </pl-combobox-list>
                     </template>
                 </pl-dom-if>
@@ -103,6 +103,17 @@ class PlCombobox extends PlElement {
             console.log('Variant is deprecated, use orientation instead');
             this.orientation = this.variant;
         }
+
+        if(this.multiSelect) {
+            this.selected = [];
+            this.value = [];
+        } else {
+            this.selected = null;
+        }
+    }
+
+    _isClearHidden() {
+        return !this.value || this.value.length == 0;
     }
 
     _selectedObserver(item) {
@@ -177,7 +188,11 @@ class PlCombobox extends PlElement {
     }
 
     _onClearClick(event) {
-        this.value = null;
+        if(this.multiSelect) {
+            this.value = [];
+        } else {
+            this.value = null;
+        }
         this.text = null;
         this.__storedValue = undefined;
 
@@ -185,7 +200,6 @@ class PlCombobox extends PlElement {
     }
     _valueObserver(newValue) {
         if (this.inStack) { return; }
-
         let found;
         if (this.data) {
             found = this.data.find((item, index) => {
@@ -258,10 +272,29 @@ class PlCombobox extends PlElement {
 
     _onSelect(event) {
         this._search = false;
-        this.__setValue(event.detail.model[this.valueProperty]);
-        this.__setText(event.detail.model[this.textProperty]);
-        this._ddOpened = false;
-        this.selected = event.detail.model;
+        if(this.multiSelect) {
+            this.inStack = true;
+            let element = event.detail.model;
+            if(element.__checked) {
+                this.push('value', event.detail.model[this.valueProperty]);
+            } else {
+                this.splice('value', this.value.indexOf(event.detail.model[this.valueProperty]), 1);
+            }
+
+            if(this.value.length > 1) {
+                this.__setText('Несколько значений...');
+            } else if(this.value.length == 1) {
+                this.__setText(event.detail.model[this.textProperty]);
+            }
+
+            this.inStack = false;
+        } else {
+            this.__setValue(event.detail.model[this.valueProperty]);
+            this.__setText(event.detail.model[this.textProperty]);
+    
+            this.selected = event.detail.model;
+            this._ddOpened = false;
+        }
     }
 }
 
