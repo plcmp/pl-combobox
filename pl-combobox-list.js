@@ -5,7 +5,7 @@ class PlComboboxList extends PlElement {
     static get properties() {
         return {
             text: { type: String },
-            value: {  },
+            valueList: { type: Array },
             data: { type: Array, value: () => [] },
             selected: { value: undefined },
             multiSelect: { type: Boolean },
@@ -19,110 +19,65 @@ class PlComboboxList extends PlElement {
         }
     };
 
-    static get css() {
-        return css`
-            :host {
-                display: block;
-                width: 100%;
-                height: 100%;
-            }
-            #ddContainer {
-                display: block;
-            }
+    static css = css`
+        :host {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #ddContainer {
+            display: block;
+        }
 
-            pl-virtual-scroll {
-                display: none;
-            }
+        pl-virtual-scroll {
+            display: none;
+        }
 
-            .comboitem {
-                box-sizing: border-box;
-                padding: 0 var(--space-sm);
-                min-height: var(--base-size-md);
-                width: 100%;
-                font: var(--text-font);
-                color: var(--text-color);
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-                gap: 8px;
-            }
+        .comboitem {
+            box-sizing: border-box;
+            padding: 0 var(--space-sm);
+            min-height: var(--base-size-md);
+            width: 100%;
+            font: var(--text-font);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 8px;
+        }
 
-            .comboitem:hover {
-                background-color: var(--grey-lightest)
-            }
+        .comboitem:hover {
+            background-color: var(--grey-lightest)
+        }
 
-            pl-icon[hidden] {
-                display: none;
-            }
-        `;
-    }
+        pl-icon[hidden] {
+            display: none;
+        }
+    `;
 
-    static get template() {
-        return html`
+    static template = html`
             <div id="ddContainer">
-                <template d:repeat="[[_filterData(data, text, _search)]]">
+                <template d:repeat="[[data]]">
                     <div class="comboitem" on-click="[[_onSelect]]">
-                        <pl-checkbox checked="[[_itemSelected(item, value)]]"></pl-checkbox>
-                        <div inner-h-t-m-l="[[_itemText(item, text, _search)]]"></div>
+                        <pl-checkbox hidden="[[!multiSelect]]" checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
+                        <div inner-h-t-m-l="[[_itemText(item, textProperty)]]"></div>
                     </div>
                 </template>
             </div>
         `;
+
+    _itemSelected(item, valueList) {
+        return this.multiSelect && valueList.includes(item[this.valueProperty]);
     }
 
-    _filterData(data, text, _search) {
-        let res = data;
-
-        if (_search && text) {
-            const fltr = this.caseSensetiveFilter ? text : text.toLowerCase();
-            res = this.data ? this.data.filter(item => {
-                const i = item[this.textProperty];
-                return i && (this.caseSensetiveFilter ? i.indexOf(fltr) : i.toLowerCase().indexOf(fltr)) !== -1;
-            }) : [];
-        }
-
-        return res;
-    }
-
-    _itemSelected(item, value) {
-        return this.multiSelect && value.includes(item[this.valueProperty]);
-    }
-
-    _itemText(item, text, _search) {
-        let res;
-        if (text) {
-            if (_search) {
-                /**
-                 * Данное условие отрабатывает во время поиска необходимой записи в combobox (когда производится ввод/вставка символов в input)
-                 */
-                const txtPart = item[this.textProperty].match(new RegExp(text, 'i'));
-                res = txtPart && item[this.textProperty].replace(new RegExp(text, 'i'), `<b>${txtPart[0]}</b>`);
-            } else {
-                /**
-                 * Отображает выбранную запись в списке, как помеченную. Остальные же отображаются стандартным текстом.
-                 */
-                res = (this.selected === item) ? `<b>${item[this.textProperty]}</b>` : item[this.textProperty];
-            }
-        } else {
-            res = item[this.textProperty]
-        }
-        return res;
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
-        this._selectedMap = new Map();
+    _itemText(item, textProperty) {
+        return item[textProperty];
     }
 
     _onSelect(event) {
-        let item = event.model.item;
-        if(this.multiSelect) {
-            item.__checked = !item.__checked;
-        }
-
         this.dispatchEvent(new CustomEvent('select', {
             detail: {
-                model: item
+                model: event.model.item
             },
             bubbles: true
         }));

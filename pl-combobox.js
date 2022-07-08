@@ -13,118 +13,157 @@ class PlCombobox extends PlElement {
     static get properties() {
         return {
             data: { type: Array, value: () => [], observer: '_dataObserver' },
-            value: { observer: '_valueObserver' },
+            value: { type: String, value: null, observer: '_valueObserver' },
             text: { type: String, observer: '_textObserver' },
-            selected: { type: Object, observer: '_selectedObserver' },
-            label: { type: String },
+            selected: { type: Object, value: null },
 
+            label: { type: String },
             required: { type: Boolean },
             readonly: { type: Boolean },
             invalid: { type: Boolean },
             variant: { type: String },
-            
             orientation: { type: String },
             stretch: { type: Boolean, reflectToAttribute: true },
             placeholder: { type: String },
             textProperty: { type: String, value: 'caption' },
             valueProperty: { type: String, value: 'id' },
+            titleProperty: { type: String, value: undefined },
+
             disabled: { type: Boolean, reflectToAttribute: true },
             hidden: { type: Boolean, reflectToAttribute: true },
-            
-            _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
-            _search: { type: Boolean, value: false },
+
             allowCustomValue: { type: Boolean, value: false },
             multiSelect: { type: Boolean, value: false },
+            valueList: { type: Array, value: () => [], observer: '_valueListObserver' },
+            selectedList: { type: Array, value: () => [] },
+
             tree: { type: Boolean, value: false },
-            selectOnlyLeaf: { type: Boolean, value: false },
             keyProperty: { type: String },
             parentProperty: { type: String },
-            _rowTemplate: { type: Object }
+            selectOnlyLeaf: { type: Boolean, value: false },
+
+            _filteredData: { pe: Array, value: () => [] },
+            _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
+            _searchText: { type: Boolean, value: null, observer: '_searchTextObserver' },
         };
     }
 
-    static get css() {
-        return css`
-            :host {
-                display: inline-block;
-            }
+    static css = css`
+        :host {
+            display: inline-block;
+        }
 
-            :host([hidden]) {
-                display: none;
-            }
+        :host([hidden]) {
+            display: none;
+        }
 
-            :host([stretch]) {
-                width: 100%;
-            }
+        :host([stretch]) {
+            width: 100%;
+        }
 
-            pl-dropdown {
-                background: var(--surface-color);
-                border-radius: var(--border-radius);
-                box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
-                max-height: 254px;
-                min-width: var(--content-width);
-                box-sizing: border-box;
-                overflow: auto;
-                padding: var(--space-md) 0;
-            }
-    	`;
-    }
+        pl-dropdown {
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
+            max-height: 254px;
+            min-width: var(--content-width);
+            box-sizing: border-box;
+            overflow: auto;
+            padding: var(--space-md) 0;
+        }
 
-    static get template() {
-        return html`
-            <pl-input stretch="[[stretch]]" readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]"
-                value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]"
-                on-click="[[_onToggle]]">
-                <slot name="prefix" slot="prefix"></slot>
-                <slot name="suffix" slot="suffix"></slot>
-                <slot name="label-prefix" slot="label-prefix"></slot>
-                <slot name="label-suffix" slot="label-suffix"></slot>
-                <pl-icon-button variant="link" hidden="[[_isClearHidden(value)]]" slot="suffix" iconset="pl-default" size="12" icon="close"
-                    on-click="[[_onClearClick]]"></pl-icon-button>
-                <pl-icon-button variant="link" iconset="pl-default" slot="suffix" size="16" icon="chevron-down"></pl-icon-button>
-            </pl-input>
-            <pl-dropdown id="dd" opened="{{_ddOpened}}">
-                <pl-dom-if if="{{_ddOpened}}">
-                    <template>
-                        <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
-                            data="[[data]]" text-property="[[textProperty]]" value-property="[[valueProperty]]"
-                            _search="[[_search]]" selected="{{selected}}" on-select="[[_onSelect]]"
-                            text="[[text]]" value="[[value]]">
-                        </pl-combobox-list>
-                    </template>
-                </pl-dom-if>
-            </pl-dropdown>
-		`;
-    }
+        .tag {
+            display: flex;
+            background: var(--primary-lightest);
+            box-sizing: border-box;
+            border: 1px solid var(--primary-light);
+            border-radius: 4px;
+            width: auto;
+            height: 20px;
+            max-width: 140px;
+            padding: 0 4px;
+            align-items: center;
+        }
+
+        .tag pl-icon {
+            cursor: pointer;
+        }
+
+        .tag-text {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+    `;
+
+    static template = html`
+        <pl-input stretch="[[stretch]]" readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]"
+            value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]"
+            on-click="[[_onOpen]]">
+            <slot name="prefix" slot="prefix"></slot>
+            <template d:repeat="[[selectedList]]">
+                <div class="tag" slot="input">
+                    <span class="tag-text" title$=[[_getTagTitle(item)]]>[[_getTagText(item)]]</span>
+                    <pl-icon iconset="pl-default" size="16" icon="close-s" on-click="[[_onRemoveTagClick]]"></pl-icon>
+                </div>
+            </template>
+            <slot name="suffix" slot="suffix"></slot>
+            <slot name="label-prefix" slot="label-prefix"></slot>
+            <slot name="label-suffix" slot="label-suffix"></slot>
+            <pl-icon-button variant="link" hidden="[[_isClearHidden(value, valueList)]]" slot="suffix" iconset="pl-default"
+                size="12" icon="close" on-click="[[_onClearClick]]"></pl-icon-button>
+            <pl-icon-button variant="link" iconset="pl-default" slot="suffix" size="16" icon="[[_getIcon(_ddOpened)]]"
+                on-click="[[_onToggle]]"></pl-icon-button>
+        </pl-input>
+        <pl-dropdown id="dd" opened="{{_ddOpened}}">
+            <pl-dom-if if="{{_ddOpened}}">
+                <template>
+                    <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
+                        data="[[_filteredData]]" text-property="[[textProperty]]" value-property="[[valueProperty]]"
+                        selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]">
+                    </pl-combobox-list>
+                </template>
+            </pl-dom-if>
+        </pl-dropdown>
+    `;
 
     connectedCallback() {
-        super.connectedCallback()
+        super.connectedCallback();
         if (this.variant) {
             console.log('Variant is deprecated, use orientation instead');
             this.orientation = this.variant;
         }
+    }
 
-        if(this.multiSelect) {
-            this.selected = [];
-            this.value = [];
+    _searchTextObserver(text) {
+        if (text != null) {
+            this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()))
+                .map(item => {
+                    const txtPart = item[this.textProperty].match(new RegExp(text, 'i'));
+                    return { ...item, [this.textProperty]: item[this.textProperty].replace(new RegExp(text, 'i'), `<b>${txtPart[0]}</b>`) };
+                });
         } else {
-            this.selected = null;
+            this._filteredData = this.data;
         }
     }
 
     _isClearHidden() {
-        return !this.value || this.value.length == 0;
+        return !this.value && this.valueList.length == 0;
     }
 
-    _selectedObserver(item) {
-        if (item) {
-            this.__setItem(item);
-        }
+    _onOpen(event) {
+        event.stopImmediatePropagation();
+
+        this._ddOpened = true;
+    }
+
+    _getIcon(opened) {
+        return opened ? 'chevron-up' : 'chevron-down';
     }
 
     _onToggle(event) {
-        this.set('_ddOpened', !this._ddOpened);
-        event.stopPropagation();
+        this._ddOpened = !this._ddOpened;
+        event.stopImmediatePropagation();
     }
 
     __setValue(value) {
@@ -133,27 +172,24 @@ class PlCombobox extends PlElement {
         this.inStack = false;
     }
 
+    _onRemoveTagClick(event) {
+        event.stopImmediatePropagation();
+
+        this.splice('valueList', this.valueList.findIndex(x => x == event.model.item.value), 1);
+    }
+
+    _getTagText(item) {
+        return item[this.textProperty];
+    }
+
+    _getTagTitle(item) {
+        return this.titleProperty ? item[this.titleProperty] : item[this.textProperty];
+    }
+
     __setText(text) {
         this.inStack = true;
         this.text = text;
         this.inStack = false;
-    }
-
-    __setItem(item) {
-        const newValue = item[this.valueProperty];
-
-        this.__setValue(newValue);
-
-        this.data.find((i, index) => {
-            const value = i[this.valueProperty];
-            if (value == newValue) {
-                this.selected = i;
-                this.__setText(i[this.textProperty]);
-
-                return true;
-            }
-            return false;
-        });
     }
 
     _dataObserver(newData) {
@@ -161,7 +197,6 @@ class PlCombobox extends PlElement {
         this.inStack = true;
         this.set('data', []);
         this.inStack = false;
-
         if (!newData || !newData.length) {
             return;
         }
@@ -169,6 +204,7 @@ class PlCombobox extends PlElement {
         if (newData[0] instanceof Object) {
             this.inStack = true;
             this.set('data', newData);
+            this.set('_filteredData', Array.from(this.data));
             this.inStack = false;
         } else {
             let d = [];
@@ -176,20 +212,26 @@ class PlCombobox extends PlElement {
                 d.push({ [this.valueProperty]: text, [this.textProperty]: text });
             });
             this.set('data', d);
+            this.set('_filteredData', Array.from(this.data));
         }
-        const val = this.__storedValue !== undefined ? this.__storedValue : this.value;
-        if (this.get('value') != val) {
-            this.set('value', val);
+        if(this.multiSelect) {
+            this._valueListObserver(this.valueList, null, { action: 'upd', value: this.valueList})
         } else {
-            this.__setText();
-            this._valueObserver(val);
+            const val = this.__storedValue !== undefined ? this.__storedValue : this.value;
+            if (this.get('value') != val) {
+                this.set('value', val);
+            } else {
+                this.__setText();
+                this._valueObserver(val);
+            }
+            this.__storedValue = undefined;
+    
         }
-        this.__storedValue = undefined;
     }
 
     _onClearClick(event) {
-        if(this.multiSelect) {
-            this.value = [];
+        if (this.multiSelect) {
+            this.valueList = [];
         } else {
             this.value = null;
         }
@@ -222,10 +264,41 @@ class PlCombobox extends PlElement {
         }
     }
 
+    _valueListObserver(newValues, old, mut) {
+        let elementsToAdd = [];
+        let elemetsToDelete = [];
+        if (this.data && this.data.length > 0) {
+            if (mut.action === 'upd' && mut.value.length > 0) {
+                elementsToAdd = newValues;
+            }
+            if (mut.action === 'upd' && mut.value.length == 0) {
+                elemetsToDelete = mut.oldValue;
+            }
+
+            if (mut.action === 'splice' && mut.added?.length > 0) {
+                elementsToAdd = mut.added;
+            }
+
+            if (mut.action === 'splice' && mut.deleted?.length > 0) {
+                elemetsToDelete = mut.deleted;
+            }
+
+            elementsToAdd.forEach((x => {
+                let item = this.data.find(f => f[this.valueProperty] == x);
+                if (item) {
+                    this.push('selectedList', item);
+                }
+            }));
+
+            elemetsToDelete.forEach((del => {
+                this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
+            }));
+        }
+    }
+
     _textObserver(newValue, oldValue, mut) {
         if (this.inStack) { return; }
-
-        if (!this._search && !this._ddOpened) {
+        if (!this._searchText) {
             let fValue = false;
             this.data && (fValue = this.data.find((item) => {
                 const text = item[this.textProperty];
@@ -237,7 +310,7 @@ class PlCombobox extends PlElement {
             }));
             if (!fValue) {
                 if (!this.allowCustomValue) {
-                    this.__setText(mut.oldValue);
+                    this.__setText(mut.value);
                 } else {
                     this.__setValue(newValue);
                 }
@@ -247,7 +320,7 @@ class PlCombobox extends PlElement {
                 this.__setValue(newValue);
             }
         }
-        this._search = this._ddOpened;
+        this._searchText = this._ddOpened ? this.text : null;
     }
 
     validator(val) {
@@ -262,36 +335,29 @@ class PlCombobox extends PlElement {
     _ddOpenedObserver(val) {
         if (this._ddOpened) {
             this.$.dd.open(this.$.input._inputContainer);
-            this._search = false;
+            this._searchText = null;
         } else {
             this.$.dd.close();
-            this._search = false;
+            this._searchText = null;
             this._valueObserver(this.value);
         }
     }
 
     _onSelect(event) {
-        this._search = false;
-        if(this.multiSelect) {
-            this.inStack = true;
-            let element = event.detail.model;
-            if(element.__checked) {
-                this.push('value', event.detail.model[this.valueProperty]);
+        this._searchText = null;
+        if (this.multiSelect) {
+            let idx = this.valueList.findIndex(x => x == event.detail.model[this.valueProperty]);
+            if (idx == -1) {
+                this.push('valueList', event.detail.model[this.valueProperty]);
             } else {
-                this.splice('value', this.value.indexOf(event.detail.model[this.valueProperty]), 1);
+                this.splice('valueList', idx, 1);
             }
 
-            if(this.value.length > 1) {
-                this.__setText('Несколько значений...');
-            } else if(this.value.length == 1) {
-                this.__setText(event.detail.model[this.textProperty]);
-            }
-
-            this.inStack = false;
+            this.__setText(null);
         } else {
             this.__setValue(event.detail.model[this.valueProperty]);
             this.__setText(event.detail.model[this.textProperty]);
-    
+
             this.selected = event.detail.model;
             this._ddOpened = false;
         }
