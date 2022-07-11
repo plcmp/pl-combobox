@@ -1,142 +1,167 @@
 import { PlElement, html, css } from "polylib";
 
+import './pl-combobox-list.js';
+
 import '@plcmp/pl-dropdown';
 import '@plcmp/pl-icon';
 import '@plcmp/pl-iconset-default';
 import '@plcmp/pl-input';
-import '@plcmp/pl-repeat';
 import '@plcmp/pl-dom-if';
+import "@plcmp/pl-checkbox";
 
 class PlCombobox extends PlElement {
-    static get properties() {
-        return {
-            data: { type: Array, value: () => [], observer: '_dataObserver' },
-            value: { type: String, observer: '_valueObserver' },
-            text: { type: String, observer: '_textObserver' },
-            selected: { type: Object, observer: '_selectedObserver' },
-            label: { type: String },
-            required: { type: Boolean },
-            readonly: { type: Boolean },
-            invalid: { type: Boolean },
-            variant: { type: String, variant: 'vertical', reflectToAttribute: true },
-            stretch: { type: Boolean, reflectToAttribute: true },
-            placeholder: { type: String },
-            textProperty: { type: String, value: 'text' },
-            valueProperty: { type: String, value: 'value' },
-            disabled: { type: Boolean, reflectToAttribute: true },
-            hidden: { type: Boolean, reflectToAttribute: true },
-            _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
-            _search: { type: Boolean, value: false },
-            allowCustomValue: { type: Boolean, value: false }
-        };
-    }
+    static properties = {
+        data: { type: Array, value: () => [], observer: '_dataObserver' },
+        value: { type: String, value: null, observer: '_valueObserver' },
+        text: { type: String, observer: '_textObserver' },
+        selected: { type: Object, value: null },
 
-    static get css() {
-        return css`
-            :host {
-                display: flex;
-                outline: none;
-                width: var(--content-width)
-            }
+        label: { type: String },
+        required: { type: Boolean },
+        readonly: { type: Boolean },
+        invalid: { type: Boolean },
+        variant: { type: String },
+        orientation: { type: String },
+        stretch: { type: Boolean, reflectToAttribute: true },
+        placeholder: { type: String },
+        textProperty: { type: String, value: 'caption' },
+        valueProperty: { type: String, value: 'id' },
+        titleProperty: { type: String, value: undefined },
 
-            :host([hidden]) {
-                display: none;
-            }
+        disabled: { type: Boolean, reflectToAttribute: true },
+        hidden: { type: Boolean, reflectToAttribute: true },
 
-            :host([variant=horizontal]) {
-                width: calc(var(--label-width) + var(--content-width));
-            }
+        allowCustomValue: { type: Boolean, value: false },
+        multiSelect: { type: Boolean, value: false },
+        valueList: { type: Array, value: () => [], observer: '_valueListObserver' },
+        selectedList: { type: Array, value: () => [] },
 
-            :host([stretch]) {
-                width: 100%;
-            }
+        tree: { type: Boolean, value: false },
+        keyProperty: { type: String },
+        parentProperty: { type: String },
+        selectOnlyLeaf: { type: Boolean, value: false },
 
-            pl-input {
-                width: 100%;
-            }
+        _filteredData: { pe: Array, value: () => [] },
+        _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
+        _searchText: { type: Boolean, value: null, observer: '_searchTextObserver' },
+    };
 
-			pl-icon {
-				cursor: pointer;
-                --pl-icon-fill-color: var(--grey-dark);
-			}
+    static css = css`
+        :host {
+            display: inline-block;
+        }
 
+        :host([hidden]) {
+            display: none;
+        }
 
-			pl-icon:hover {
-                --pl-icon-fill-color: var(--text-color);
-			}
+        :host([stretch]) {
+            width: 100%;
+        }
 
-            pl-dropdown {
-                background: var(--surface-color);
-                border-radius: var(--border-radius);
-                box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
-                max-height: 254px;
-                min-width: var(--content-width);
-                box-sizing: border-box;
-                overflow: auto;
-                padding: var(--space-md) 0;
-            }
+        pl-dropdown {
+            background: var(--surface-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
+            max-height: 254px;
+            min-width: var(--content-width);
+            box-sizing: border-box;
+            overflow: auto;
+            padding: var(--space-md) 0;
+        }
 
-            .comboitem {
-                box-sizing: border-box;
-                padding: 0 var(--space-sm);
-                min-height: var(--base-size-md);
-                width: 100%;
-                font: var(--text-font);
-                color: var(--text-color);
-                display: flex;
-                align-items: center;
-                cursor: pointer;
-            }
+        .tag {
+            display: flex;
+            background: var(--primary-lightest);
+            box-sizing: border-box;
+            border: 1px solid var(--primary-light);
+            border-radius: 4px;
+            width: auto;
+            height: 20px;
+            max-width: 140px;
+            padding: 0 4px;
+            align-items: center;
+        }
 
-            .comboitem:hover {
-                background-color: var(--grey-lightest)
-            }
+        .tag pl-icon {
+            cursor: pointer;
+        }
 
-            pl-icon[hidden] {
-                display: none;
-            }
-    	`;
-    }
+        .tag-text {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+    `;
 
-    static get template() {
-        return html`
-			<pl-input readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]" value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" variant="[[variant]]" on-click="[[_onToggle]]">
-                <slot name="prefix" slot="prefix"></slot>
-                <slot name="suffix" slot="suffix"></slot>
-                <pl-icon hidden="[[!value]]" slot="suffix" iconset="pl-default" size="16" icon="close-s" on-click="[[_onClearClick]]"></pl-icon>
-                <pl-icon iconset="pl-default" slot="suffix" size="16" icon="chevron-down-s"></pl-icon>
-            </pl-input>
-			<pl-dropdown id="dd" opened="{{_ddOpened}}">
-                <pl-dom-if if="[[_ddOpened]]">
-                    <template>
-                        <pl-repeat items="[[_filterData(data, text, _search)]]">
-                            <template>
-                                <div class="comboitem" on-click="[[_onSelect]]">
-                                    <div inner-h-t-m-l="[[_itemText(item, text, _search, _ddOpened)]]"></div>
-                                </div>
-                            </template>
-                        </pl-repeat>
-                    </template>
-                </pl-dom-if>
-            </pl-dropdown>
-
-		`;
-    }
+    static template = html`
+        <pl-input stretch="[[stretch]]" readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]"
+            value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]"
+            on-click="[[_onOpen]]">
+            <slot name="prefix" slot="prefix"></slot>
+            <template d:repeat="[[selectedList]]">
+                <div class="tag" slot="input">
+                    <span class="tag-text" title$=[[_getTagTitle(item)]]>[[_getTagText(item)]]</span>
+                    <pl-icon iconset="pl-default" size="16" icon="close-s" on-click="[[_onRemoveTagClick]]"></pl-icon>
+                </div>
+            </template>
+            <slot name="suffix" slot="suffix"></slot>
+            <slot name="label-prefix" slot="label-prefix"></slot>
+            <slot name="label-suffix" slot="label-suffix"></slot>
+            <pl-icon-button variant="link" hidden="[[_isClearHidden(value, valueList)]]" slot="suffix" iconset="pl-default"
+                size="12" icon="close" on-click="[[_onClearClick]]"></pl-icon-button>
+            <pl-icon-button variant="link" iconset="pl-default" slot="suffix" size="16" icon="[[_getIcon(_ddOpened)]]"
+                on-click="[[_onToggle]]"></pl-icon-button>
+        </pl-input>
+        <pl-dropdown id="dd" opened="{{_ddOpened}}">
+            <pl-dom-if if="{{_ddOpened}}">
+                <template>
+                    <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
+                        data="[[_filteredData]]" text-property="[[textProperty]]" value-property="[[valueProperty]]"
+                        selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]">
+                    </pl-combobox-list>
+                </template>
+            </pl-dom-if>
+        </pl-dropdown>
+    `;
 
     connectedCallback() {
         super.connectedCallback();
-        this.$.input.validators.push(this.validator.bind(this));
-    }
-
-    _selectedObserver(item) {
-        if (item) {
-            this.__setItem(item);
+        if (this.variant) {
+            console.log('Variant is deprecated, use orientation instead');
+            this.orientation = this.variant;
         }
     }
 
+    _searchTextObserver(text) {
+        if (text != null) {
+            this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()))
+                .map(item => {
+                    const txtPart = item[this.textProperty].match(new RegExp(text, 'i'));
+                    return { ...item, [this.textProperty]: item[this.textProperty].replace(new RegExp(text, 'i'), `<b>${txtPart[0]}</b>`) };
+                });
+        } else {
+            this._filteredData = this.data;
+        }
+    }
+
+    _isClearHidden() {
+        return !this.value && this.valueList.length == 0;
+    }
+
+    _onOpen(event) {
+        event.stopImmediatePropagation();
+
+        this._ddOpened = true;
+    }
+
+    _getIcon(opened) {
+        return opened ? 'chevron-up' : 'chevron-down';
+    }
+
     _onToggle(event) {
-        this.set('_ddOpened', !this._ddOpened);
-        event.stopPropagation();
+        this._ddOpened = !this._ddOpened;
+        event.stopImmediatePropagation();
     }
 
     __setValue(value) {
@@ -145,27 +170,24 @@ class PlCombobox extends PlElement {
         this.inStack = false;
     }
 
+    _onRemoveTagClick(event) {
+        event.stopImmediatePropagation();
+
+        this.splice('valueList', this.valueList.findIndex(x => x == event.model.item.value), 1);
+    }
+
+    _getTagText(item) {
+        return item[this.textProperty];
+    }
+
+    _getTagTitle(item) {
+        return this.titleProperty ? item[this.titleProperty] : item[this.textProperty];
+    }
+
     __setText(text) {
         this.inStack = true;
         this.text = text;
         this.inStack = false;
-    }
-
-    __setItem(item) {
-        const newValue = item[this.valueProperty];
-
-        this.__setValue(newValue);
-
-        this.data.find((i, index) => {
-            const value = i[this.valueProperty];
-            if (value == newValue) {
-                this.selected = i;
-                this.__setText(i[this.textProperty]);
-
-                return true;
-            }
-            return false;
-        });
     }
 
     _dataObserver(newData) {
@@ -173,7 +195,6 @@ class PlCombobox extends PlElement {
         this.inStack = true;
         this.set('data', []);
         this.inStack = false;
-
         if (!newData || !newData.length) {
             return;
         }
@@ -181,6 +202,7 @@ class PlCombobox extends PlElement {
         if (newData[0] instanceof Object) {
             this.inStack = true;
             this.set('data', newData);
+            this.set('_filteredData', Array.from(this.data));
             this.inStack = false;
         } else {
             let d = [];
@@ -188,27 +210,36 @@ class PlCombobox extends PlElement {
                 d.push({ [this.valueProperty]: text, [this.textProperty]: text });
             });
             this.set('data', d);
+            this.set('_filteredData', Array.from(this.data));
         }
-        const val = this.__storedValue !== undefined ? this.__storedValue : this.value;
-        if (this.get('value') != val) {
-            this.set('value', val);
+        if (this.multiSelect) {
+            this._valueListObserver(this.valueList, null, { action: 'upd', value: this.valueList })
         } else {
-            this.__setText();
-            this._valueObserver(val);
+            const val = this.__storedValue !== undefined ? this.__storedValue : this.value;
+            if (this.get('value') != val) {
+                this.set('value', val);
+            } else {
+                this.__setText();
+                this._valueObserver(val);
+            }
+            this.__storedValue = undefined;
+
         }
-        this.__storedValue = undefined;
     }
 
     _onClearClick(event) {
-        this.value = null;
+        if (this.multiSelect) {
+            this.valueList = [];
+        } else {
+            this.value = null;
+        }
         this.text = null;
         this.__storedValue = undefined;
 
         event.stopImmediatePropagation();
     }
-    _valueObserver(newValue, oldValue, mut) {
+    _valueObserver(newValue) {
         if (this.inStack) { return; }
-
         let found;
         if (this.data) {
             found = this.data.find((item, index) => {
@@ -231,10 +262,41 @@ class PlCombobox extends PlElement {
         }
     }
 
+    _valueListObserver(newValues, old, mut) {
+        let elementsToAdd = [];
+        let elemetsToDelete = [];
+        if (this.data && this.data.length > 0) {
+            if (mut.action === 'upd' && mut.value.length > 0) {
+                elementsToAdd = newValues;
+            }
+            if (mut.action === 'upd' && mut.value.length == 0) {
+                elemetsToDelete = mut.oldValue;
+            }
+
+            if (mut.action === 'splice' && mut.added?.length > 0) {
+                elementsToAdd = mut.added;
+            }
+
+            if (mut.action === 'splice' && mut.deleted?.length > 0) {
+                elemetsToDelete = mut.deleted;
+            }
+
+            elementsToAdd.forEach((x => {
+                let item = this.data.find(f => f[this.valueProperty] == x);
+                if (item) {
+                    this.push('selectedList', item);
+                }
+            }));
+
+            elemetsToDelete.forEach((del => {
+                this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
+            }));
+        }
+    }
+
     _textObserver(newValue, oldValue, mut) {
         if (this.inStack) { return; }
-
-        if (!this._search && !this._ddOpened) {
+        if (!this._searchText) {
             let fValue = false;
             this.data && (fValue = this.data.find((item) => {
                 const text = item[this.textProperty];
@@ -246,7 +308,7 @@ class PlCombobox extends PlElement {
             }));
             if (!fValue) {
                 if (!this.allowCustomValue) {
-                    this.__setText(mut.oldValue);
+                    this.__setText(mut.value);
                 } else {
                     this.__setValue(newValue);
                 }
@@ -256,7 +318,7 @@ class PlCombobox extends PlElement {
                 this.__setValue(newValue);
             }
         }
-        this._search = this._ddOpened;
+        this._searchText = this._ddOpened ? this.text : null;
     }
 
     validator(val) {
@@ -271,58 +333,33 @@ class PlCombobox extends PlElement {
     _ddOpenedObserver(val) {
         if (this._ddOpened) {
             this.$.dd.open(this.$.input._inputContainer);
-            this._search = false;
+            this._searchText = null;
         } else {
             this.$.dd.close();
-            this._search = false;
+            this._searchText = null;
             this._valueObserver(this.value);
         }
     }
 
-    _filterData(data, text, _search) {
-        let res = data;
-
-        if (_search && text) {
-            const fltr = this.caseSensetiveFilter ? text : text.toLowerCase();
-            res = this.data ? this.data.filter(item => {
-                const i = item[this.textProperty];
-                return i && (this.caseSensetiveFilter ? i.indexOf(fltr) : i.toLowerCase().indexOf(fltr)) !== -1;
-            }) : [];
-        }
-
-        return res;
-    }
-
-    _itemText(item, text, _search, _ddOpened) {
-        let res;
-        if (text) {
-            if (_search) {
-                /**
-                 * Данное условие отрабатывает во время поиска необходимой записи в combobox (когда производится ввод/вставка символов в input)
-                 */
-                const txtPart = item[this.textProperty].match(new RegExp(text, 'i'));
-                res = txtPart && item[this.textProperty].replace(new RegExp(text, 'i'), `<b>${txtPart[0]}</b>`);
-            } else {
-                /**
-                 * Отображает выбранную запись в списке, как помеченную. Остальные же отображаются стандартным текстом.
-                 */
-                res = (this.selected === item) ? `<b>${item[this.textProperty]}</b>` : item[this.textProperty];
-            }
-        } else {
-            res = item[this.textProperty]
-        }
-        return res;
-    }
-
     _onSelect(event) {
+        this._searchText = null;
+        if (this.multiSelect) {
+            let idx = this.valueList.findIndex(x => x == event.detail.model[this.valueProperty]);
+            if (idx == -1) {
+                this.push('valueList', event.detail.model[this.valueProperty]);
+            } else {
+                this.splice('valueList', idx, 1);
+            }
 
-        this._search = false;
-        this.__setValue(event.model.item[this.valueProperty]);
-        this.__setText(event.model.item[this.textProperty]);
-        this._ddOpened = false;
-        this.selected = event.model.item;
+            this.__setText(null);
+        } else {
+            this.__setValue(event.detail.model[this.valueProperty]);
+            this.__setText(event.detail.model[this.textProperty]);
+
+            this.selected = event.detail.model;
+            this._ddOpened = false;
+        }
     }
-
 }
 
 customElements.define('pl-combobox', PlCombobox);
