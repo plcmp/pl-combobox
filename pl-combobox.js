@@ -24,8 +24,8 @@ class PlCombobox extends PlElement {
         orientation: { type: String },
         stretch: { type: Boolean, reflectToAttribute: true },
         placeholder: { type: String },
-        textProperty: { type: String, value: 'caption' },
-        valueProperty: { type: String, value: 'id' },
+        textProperty: { type: String, value: 'text' },
+        valueProperty: { type: String, value: 'value' },
         titleProperty: { type: String, value: undefined },
 
         disabled: { type: Boolean, reflectToAttribute: true },
@@ -194,6 +194,8 @@ class PlCombobox extends PlElement {
         if (this.inStack) { return; }
         this.inStack = true;
         this.set('data', []);
+        this.set('_filteredData', []);
+
         this.inStack = false;
         if (!newData || !newData.length) {
             return;
