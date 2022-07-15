@@ -8,6 +8,7 @@ import '@plcmp/pl-iconset-default';
 import '@plcmp/pl-input';
 import '@plcmp/pl-dom-if';
 import "@plcmp/pl-checkbox";
+import "@plcmp/pl-data-tree";
 
 class PlCombobox extends PlElement {
     static properties = {
@@ -38,10 +39,13 @@ class PlCombobox extends PlElement {
 
         tree: { type: Boolean, value: false },
         keyProperty: { type: String },
-        parentProperty: { type: String },
+        pkeyProperty: { type: String },
+        hasChildProperty: { type: String, value: '_haschildren' },
+
         selectOnlyLeaf: { type: Boolean, value: false },
 
-        _filteredData: { pe: Array, value: () => [] },
+        _filteredData: { type: Array, value: () => [] },
+        _vdata: { type: Array, value: () => [] },
         _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
         _searchText: { type: Boolean, value: null, observer: '_searchTextObserver' },
     };
@@ -117,29 +121,28 @@ class PlCombobox extends PlElement {
             <pl-dom-if if="{{_ddOpened}}">
                 <template>
                     <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
-                        data="[[_filteredData]]" text-property="[[textProperty]]" value-property="[[valueProperty]]"
-                        selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]">
+                    _vdata="{{_vdata}}" data="{{_filteredData}}" text-property="[[textProperty]]" value-property="[[valueProperty]]"
+                        key-property="[[keyProperty]]" pkey-property="[[pkeyProperty]]"
+                        selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]" _search="[[_searchText]]">
                     </pl-combobox-list>
                 </template>
             </pl-dom-if>
         </pl-dropdown>
+        <pl-data-tree bypass="[[!tree]]" key-field="[[keyProperty]]" pkey-field="[[pkeyProperty]]"
+            has-child-field="[[hasChildProperty]]" partial-data="[[partialData]]" in="{{_filteredData}}" out="{{_vdata}}">
+        </pl-data-tree>
     `;
 
     connectedCallback() {
         super.connectedCallback();
         if (this.variant) {
-            console.log('Variant is deprecated, use orientation instead');
             this.orientation = this.variant;
         }
     }
 
     _searchTextObserver(text) {
         if (text != null) {
-            this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()))
-                .map(item => {
-                    const txtPart = item[this.textProperty].match(new RegExp(text, 'i'));
-                    return { ...item, [this.textProperty]: item[this.textProperty].replace(new RegExp(text, 'i'), `<b>${txtPart[0]}</b>`) };
-                });
+            this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
         } else {
             this._filteredData = this.data;
         }
@@ -173,7 +176,7 @@ class PlCombobox extends PlElement {
     _onRemoveTagClick(event) {
         event.stopImmediatePropagation();
 
-        this.splice('valueList', this.valueList.findIndex(x => x == event.model.item.value), 1);
+        this.splice('valueList', this.valueList.findIndex(x => x == event.model.item[this.valueProperty]), 1);
     }
 
     _getTagText(item) {
@@ -192,10 +195,10 @@ class PlCombobox extends PlElement {
 
     _dataObserver(newData) {
         if (this.inStack) { return; }
+
         this.inStack = true;
         this.set('data', []);
         this.set('_filteredData', []);
-
         this.inStack = false;
         if (!newData || !newData.length) {
             return;
@@ -272,7 +275,7 @@ class PlCombobox extends PlElement {
                 elementsToAdd = newValues;
             }
             if (mut.action === 'upd' && mut.value.length == 0) {
-                elemetsToDelete = mut.oldValue;
+                elemetsToDelete = mut.oldValue || [];
             }
 
             if (mut.action === 'splice' && mut.added?.length > 0) {
@@ -280,13 +283,14 @@ class PlCombobox extends PlElement {
             }
 
             if (mut.action === 'splice' && mut.deleted?.length > 0) {
-                elemetsToDelete = mut.deleted;
+                elemetsToDelete = mut.deleted || [];
             }
 
             elementsToAdd.forEach((x => {
                 let item = this.data.find(f => f[this.valueProperty] == x);
                 if (item) {
-                    this.push('selectedList', item);
+                    if (!this.selectedList.includes(item))
+                        this.push('selectedList', item);
                 }
             }));
 

@@ -1,19 +1,20 @@
 import { html, PlElement, css } from "polylib";
-import '@plcmp/pl-virtual-scroll';
 
 class PlComboboxList extends PlElement {
     static properties = {
         text: { type: String },
         valueList: { type: Array },
         data: { type: Array, value: () => [] },
+        _vdata: { type: Array, value: () => [] },
         selected: { value: undefined },
         multiSelect: { type: Boolean },
         tree: { type: Boolean },
+        keyProperty: { type: String },
+        pkeyProperty: { type: String },
+
         selectOnlyLeaf: { type: Boolean },
         textProperty: { type: String },
         valueProperty: { type: String },
-        keyProperty: { type: String, },
-        parentProperty: { type: String },
         _search: { type: String }
     }
 
@@ -47,18 +48,18 @@ class PlComboboxList extends PlElement {
         .comboitem:hover {
             background-color: var(--grey-lightest)
         }
-
-        pl-icon[hidden] {
-            display: none;
-        }
     `;
 
     static template = html`
             <div id="ddContainer">
-                <template d:repeat="[[data]]">
+                <template d:repeat="{{_vdata}}">
                     <div class="comboitem" on-click="[[_onSelect]]">
+                        <span class="tree-cell" style$="[[_getRowPadding(item)]]">
+                            <pl-icon-button variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]"
+                                on-click="[[_onTreeNodeClick]]"></pl-icon-button>
+                        </span>
                         <pl-checkbox hidden="[[!multiSelect]]" checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-                        <div inner-h-t-m-l="[[_itemText(item, textProperty)]]"></div>
+                        <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
                     </div>
                 </template>
             </div>
@@ -68,7 +69,12 @@ class PlComboboxList extends PlElement {
         return this.multiSelect && valueList.includes(item[this.valueProperty]);
     }
 
-    _itemText(item, textProperty) {
+    _itemText(item, textProperty, search) {
+        if (search) {
+            const txtPart = item[this.textProperty].match(new RegExp(search, 'i'));
+            return item[this.textProperty].replace(new RegExp(search, 'i'), `<b>${txtPart?.[0]}</b>`);
+        }
+
         return item[textProperty];
     }
 
@@ -81,19 +87,28 @@ class PlComboboxList extends PlElement {
         }));
     }
 
-    _getRowPadding(row) {
+    _onTreeNodeClick(event) {
+        event.stopPropagation();
+        if (event.model.item._haschildren === false) {
+            return;
+        }
+        let idx = this.data.indexOf(event.model.item);
+        this.set(`data.${idx}._opened`, !event.model.item._opened);
+    }
+
+    _getRowPadding(item) {
         if (this.tree) {
-            return `padding-left: ${row._level * 12 + 'px'}`;
+            return `padding-left: ${item._level * 12 + 'px'}`;
         }
         return 'display:none;';
     }
 
-    _getTreeIcon(row) {
-        if (!row._haschildren) {
+    _getTreeIcon(item) {
+        if (!item._haschildren) {
             return '';
         }
 
-        return row._opened ? 'minus' : 'plus';
+        return item._opened ? 'triangle-down' : 'triangle-right';
     }
 }
 
