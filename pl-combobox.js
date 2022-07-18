@@ -121,9 +121,10 @@ class PlCombobox extends PlElement {
             <pl-dom-if if="{{_ddOpened}}">
                 <template>
                     <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
-                    _vdata="{{_vdata}}" data="{{_filteredData}}" text-property="[[textProperty]]" value-property="[[valueProperty]]"
-                        key-property="[[keyProperty]]" pkey-property="[[pkeyProperty]]"
-                        selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]" _search="[[_searchText]]">
+                        _vdata="{{_vdata}}" data="{{_filteredData}}" text-property="[[textProperty]]"
+                        value-property="[[valueProperty]]" key-property="[[keyProperty]]" pkey-property="[[pkeyProperty]]"
+                        selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]"
+                        _search="[[_searchText]]">
                     </pl-combobox-list>
                 </template>
             </pl-dom-if>
@@ -141,8 +142,34 @@ class PlCombobox extends PlElement {
     }
 
     _searchTextObserver(text) {
-        if (text != null) {
-            this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
+        if (text != null && text != undefined && text != '') {
+            if (this.multiSelect) {
+                let parents = new Set();
+                let filtered = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
+                filtered.forEach((item) => {
+                    if (item[this.pkeyProperty] != null && item[this.pkeyProperty] != undefined) {
+                        parents.add(item[this.pkeyProperty]);
+                    }
+                });
+                for (const p of parents) {
+                    const item = this.data.find(i => i[this.keyProperty] === p);
+                    if (item) {
+                        filtered.push(item);
+                        if (item[this.pkeyProperty] !== null && item[this.pkeyProperty] !== undefined) parents.add(item[this.pkeyProperty]);
+                    }
+                }
+
+                filtered.forEach((i) => {
+                    if (parents.has(i[this.keyProperty])) {
+                        i[this.hasChildProperty] = true;
+                        i._opened = true;
+                    }
+                });
+
+                this.splice('_filteredData', 0, this._filteredData.length, ...filtered);
+            } else {
+                this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
+            }
         } else {
             this._filteredData = this.data;
         }
