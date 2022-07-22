@@ -106,15 +106,15 @@ class PlCombobox extends PlElement {
             <template d:repeat="[[selectedList]]">
                 <div class="tag" slot="input">
                     <span class="tag-text" title$=[[_getTagTitle(item)]]>[[_getTagText(item)]]</span>
-                    <pl-icon iconset="pl-default" size="16" icon="close-s" on-click="[[_onRemoveTagClick]]"></pl-icon>
+                    <pl-icon hidden="[[readonly]]" iconset="pl-default" size="16" icon="close-s" on-click="[[_onRemoveTagClick]]"></pl-icon>
                 </div>
             </template>
             <slot name="suffix" slot="suffix"></slot>
             <slot name="label-prefix" slot="label-prefix"></slot>
             <slot name="label-suffix" slot="label-suffix"></slot>
-            <pl-icon-button variant="link" hidden="[[_isClearHidden(value, valueList)]]" slot="suffix" iconset="pl-default"
+            <pl-icon-button variant="link" hidden="[[_isClearHidden(value, valueList, readonly)]]" slot="suffix" iconset="pl-default"
                 size="12" icon="close" on-click="[[_onClearClick]]"></pl-icon-button>
-            <pl-icon-button variant="link" iconset="pl-default" slot="suffix" size="16" icon="[[_getIcon(_ddOpened)]]"
+            <pl-icon-button variant="link" hidden="[[readonly]]" iconset="pl-default" slot="suffix" size="16" icon="[[_getIcon(_ddOpened)]]"
                 on-click="[[_onToggle]]"></pl-icon-button>
         </pl-input>
         <pl-dropdown id="dd" opened="{{_ddOpened}}">
@@ -176,13 +176,14 @@ class PlCombobox extends PlElement {
     }
 
     _isClearHidden() {
-        return !this.value && this.valueList.length == 0;
+        return this.readonly || !this.value && this.valueList.length == 0;
     }
 
     _onOpen(event) {
         event.stopImmediatePropagation();
-
-        this._ddOpened = true;
+        if(!this.readonly) {
+            this._ddOpened = true;
+        }
     }
 
     _getIcon(opened) {
@@ -190,8 +191,10 @@ class PlCombobox extends PlElement {
     }
 
     _onToggle(event) {
-        this._ddOpened = !this._ddOpened;
         event.stopImmediatePropagation();
+        if(!this.readonly) {
+            this._ddOpened = !this._ddOpened;
+        }
     }
 
     __setValue(value) {
