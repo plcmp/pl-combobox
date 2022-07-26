@@ -4,7 +4,6 @@ class PlComboboxList extends PlElement {
     static properties = {
         text: { type: String },
         valueList: { type: Array },
-        data: { type: Array, value: () => [] },
         _vdata: { type: Array, value: () => [] },
         selected: { value: undefined },
         multiSelect: { type: Boolean },
@@ -92,8 +91,8 @@ class PlComboboxList extends PlElement {
         if (event.model.item._haschildren === false) {
             return;
         }
-        let idx = this.data.indexOf(event.model.item);
-        this.set(`data.${idx}._opened`, !event.model.item._opened);
+        let idx = this._vdata.indexOf(event.model.item);
+        this.set(`_vdata.${idx}._opened`, !event.model.item._opened);
     }
 
     _getRowPadding(item) {

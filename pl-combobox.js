@@ -121,7 +121,7 @@ class PlCombobox extends PlElement {
             <pl-dom-if if="{{_ddOpened}}">
                 <template>
                     <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
-                        _vdata="{{_vdata}}" data="{{_filteredData}}" text-property="[[textProperty]]"
+                        _vdata="{{_vdata}}" text-property="[[textProperty]]"
                         value-property="[[valueProperty]]" key-property="[[keyProperty]]" pkey-property="[[pkeyProperty]]"
                         selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]"
                         _search="[[_searchText]]">
