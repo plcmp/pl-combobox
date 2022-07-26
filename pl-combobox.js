@@ -171,7 +171,7 @@ class PlCombobox extends PlElement {
                 this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
             }
         } else {
-            this._filteredData = this.data;
+            this._filteredData = [...this.data];
         }
     }
 
