@@ -145,7 +145,7 @@ class PlCombobox extends PlElement {
         if (text != null && text !== '') {
             if (this.multiSelect) {
                 let parents = new Set();
-                let filtered = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
+                let filtered = new Set(this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase())));
                 filtered.forEach((item) => {
                     if (item[this.pkeyProperty] != null && item[this.pkeyProperty] != undefined) {
                         parents.add(item[this.pkeyProperty]);
@@ -154,7 +154,7 @@ class PlCombobox extends PlElement {
                 for (const p of parents) {
                     const item = this.data.find(i => i[this.keyProperty] === p);
                     if (item) {
-                        filtered.push(item);
+                        filtered.add(item);
                         if (item[this.pkeyProperty] !== null && item[this.pkeyProperty] !== undefined) parents.add(item[this.pkeyProperty]);
                     }
                 }
