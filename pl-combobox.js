@@ -136,9 +136,25 @@ class PlCombobox extends PlElement {
 
     connectedCallback() {
         super.connectedCallback();
+
+        this.$.input.validators = [this.validator.bind(this)];
+
         if (this.variant) {
             this.orientation = this.variant;
         }
+    }
+
+    validator(value) {
+        let messages = [];
+        if(this.multiSelect) {
+            if(this.valueList.length == 0 && this.required) {
+                messages.push('Значение не может быть пустым');
+            } 
+        } else if((this.value == null || this.value == undefined) && this.required) {
+                messages.push('Значение не может быть пустым');
+            }
+
+        return messages.length > 0 ? messages.join(';') : undefined;
     }
 
     _searchTextObserver(text) {
@@ -295,6 +311,8 @@ class PlCombobox extends PlElement {
         } else {
             this.__storedValue = undefined;
         }
+
+        this.$.input.validate();
     }
 
     _valueListObserver(newValues, old, mut) {
@@ -327,6 +345,8 @@ class PlCombobox extends PlElement {
             elemetsToDelete.forEach((del => {
                 this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
             }));
+
+            this.$.input.validate();
         }
     }
 
@@ -355,15 +375,6 @@ class PlCombobox extends PlElement {
             }
         }
         this._searchText = this._ddOpened ? this.text : null;
-    }
-
-    validator(val) {
-        let messages = [];
-        if (!this.value && this.text) {
-            messages.push('Значение не может быть пустым');
-        }
-
-        return messages.length > 0 ? messages.join(';') : undefined;
     }
 
     _ddOpenedObserver(val) {

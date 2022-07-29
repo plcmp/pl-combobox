@@ -25,6 +25,7 @@
     "dependencies": {
         "polylib": "^1.1.4",
         "@plcmp/pl-dropdown": "^0.1.0",
+        "@plcmp/pl-dom-if": "^0.1.0",
         "@plcmp/pl-icon": "^0.1.0",
         "@plcmp/pl-iconset-default": "^0.1.0",
         "@plcmp/pl-input": "^0.1.1",

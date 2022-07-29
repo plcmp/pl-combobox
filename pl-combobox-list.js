@@ -57,7 +57,11 @@ class PlComboboxList extends PlElement {
                             <pl-icon-button variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]"
                                 on-click="[[_onTreeNodeClick]]"></pl-icon-button>
                         </span>
-                        <pl-checkbox hidden="[[!multiSelect]]" checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
+                        <pl-dom-if if="[[multiSelect]]">
+                            <template>
+                                <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
+                            </template>
+                        </pl-dom-if>
                         <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
                     </div>
                 </template>
