@@ -196,7 +196,6 @@ class PlCombobox extends PlElement {
     }
 
     _onOpen(event) {
-        event.stopImmediatePropagation();
         if(!this.readonly) {
             this._ddOpened = true;
         }
@@ -207,7 +206,6 @@ class PlCombobox extends PlElement {
     }
 
     _onToggle(event) {
-        event.stopImmediatePropagation();
         if(!this.readonly) {
             this._ddOpened = !this._ddOpened;
         }
