@@ -377,7 +377,7 @@ class PlCombobox extends PlElement {
 
     _ddOpenedObserver(val) {
         if (this._ddOpened) {
-            this.$.dd.open(this.$.input._inputContainer);
+            this.$.dd.open(this.$.input.$.inputContainer);
             this._searchText = null;
         } else {
             this.$.dd.close();
