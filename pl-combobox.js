@@ -139,6 +139,14 @@ class PlCombobox extends PlElement {
 
         this.$.input.validators = [this.validator.bind(this)];
 
+
+        const resizeObserver = new ResizeObserver(() => {
+            this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
+            this.$.dd.reFit(this.$.input.$.inputContainer);
+        });
+
+        resizeObserver.observe(this.$.input.$.inputContainer);
+
         if (this.variant) {
             this.orientation = this.variant;
         }
@@ -206,6 +214,7 @@ class PlCombobox extends PlElement {
     }
 
     _onToggle(event) {
+        event.stopPropagation();
         if(!this.readonly) {
             this._ddOpened = !this._ddOpened;
         }
@@ -218,7 +227,7 @@ class PlCombobox extends PlElement {
     }
 
     _onRemoveTagClick(event) {
-        event.stopImmediatePropagation();
+        event.stopPropagation();
 
         this.splice('valueList', this.valueList.findIndex(x => x == event.model.item[this.valueProperty]), 1);
     }
