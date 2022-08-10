@@ -130,7 +130,7 @@ class PlCombobox extends PlElement {
             </pl-dom-if>
         </pl-dropdown>
         <pl-data-tree bypass="[[!tree]]" key-field="[[keyProperty]]" pkey-field="[[pkeyProperty]]"
-            has-child-field="[[hasChildProperty]]" partial-data="[[partialData]]" in="{{_filteredData}}" out="{{_vdata}}">
+            has-child-field="[[hasChildProperty]]" in="{{_filteredData}}" out="{{_vdata}}">
         </pl-data-tree>
     `;
 
@@ -167,7 +167,7 @@ class PlCombobox extends PlElement {
 
     _searchTextObserver(text) {
         if (text != null && text !== '') {
-            if (this.multiSelect) {
+            if (this.tree) {
                 let parents = new Set();
                 let filtered = new Set(this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase())));
                 filtered.forEach((item) => {
