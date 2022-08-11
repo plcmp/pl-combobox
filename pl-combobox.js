@@ -139,6 +139,14 @@ class PlCombobox extends PlElement {
 
         this.$.input.validators = [this.validator.bind(this)];
 
+        this.$.dd._close = e => {
+            let path = e.composedPath();
+            if (!path.includes(this)) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.$.dd.close();
+            }
+        }
 
         const resizeObserver = new ResizeObserver(() => {
             this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
@@ -190,7 +198,7 @@ class PlCombobox extends PlElement {
                     }
                 });
 
-                this.splice('_filteredData', 0, this._filteredData.length, ...filtered);
+                this._filteredData = [...filtered];
             } else {
                 this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
             }
@@ -214,7 +222,6 @@ class PlCombobox extends PlElement {
     }
 
     _onToggle(event) {
-        event.stopPropagation();
         if(!this.readonly) {
             this._ddOpened = !this._ddOpened;
         }
@@ -387,6 +394,9 @@ class PlCombobox extends PlElement {
     _ddOpenedObserver(val) {
         if (this._ddOpened) {
             this.$.dd.open(this.$.input.$.inputContainer);
+            this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
+            this.$.dd.reFit(this.$.input.$.inputContainer);
+
             this._searchText = null;
         } else {
             this.$.dd.close();
