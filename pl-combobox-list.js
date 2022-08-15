@@ -10,7 +10,6 @@ class PlComboboxList extends PlElement {
         tree: { type: Boolean },
         keyProperty: { type: String },
         pkeyProperty: { type: String },
-
         selectOnlyLeaf: { type: Boolean },
         textProperty: { type: String },
         valueProperty: { type: String },
@@ -82,6 +81,9 @@ class PlComboboxList extends PlElement {
     }
 
     _onSelect(event) {
+        if(event.model.item._haschildren && this.tree && this.selectOnlyLeaf) {
+            return;
+        }
         this.dispatchEvent(new CustomEvent('select', {
             detail: {
                 model: event.model.item
