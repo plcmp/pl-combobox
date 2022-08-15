@@ -120,7 +120,7 @@ class PlCombobox extends PlElement {
         <pl-dropdown id="dd" opened="{{_ddOpened}}">
             <pl-dom-if if="{{_ddOpened}}">
                 <template>
-                    <pl-combobox-list tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
+                    <pl-combobox-list data="[[data]]" tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
                         _vdata="{{_vdata}}" text-property="[[textProperty]]"
                         value-property="[[valueProperty]]" key-property="[[keyProperty]]" pkey-property="[[pkeyProperty]]"
                         selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]"

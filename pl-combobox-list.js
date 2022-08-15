@@ -4,7 +4,8 @@ class PlComboboxList extends PlElement {
     static properties = {
         text: { type: String },
         valueList: { type: Array },
-        _vdata: { type: Array, value: () => [] },
+        _vdata: { type: Array },
+        data: { type: Array },
         selected: { value: undefined },
         multiSelect: { type: Boolean },
         tree: { type: Boolean },
@@ -56,7 +57,7 @@ class PlComboboxList extends PlElement {
                             <pl-icon-button variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]"
                                 on-click="[[_onTreeNodeClick]]"></pl-icon-button>
                         </span>
-                        <pl-dom-if if="[[multiSelect]]">
+                        <pl-dom-if if="[[_isCheckBoxHidden(multiSelect, selectOnlyLeaf, item)]]">
                             <template>
                                 <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
                             </template>
@@ -80,10 +81,23 @@ class PlComboboxList extends PlElement {
         return item[textProperty];
     }
 
+    _isCheckBoxHidden(multiSelect, selectOnlyLeaf, item) {
+       if(!multiSelect) {
+            return false;
+       }
+
+       if(selectOnlyLeaf) {
+            return !this.data.find(x => x[this.pkeyProperty] == item[this.keyProperty])
+       }
+
+       return true;
+    }
+
     _onSelect(event) {
-        if(event.model.item._haschildren && this.tree && this.selectOnlyLeaf) {
+        if(this.tree && this.selectOnlyLeaf && this.data.find(x => x[this.pkeyProperty] == event.model.item[this.keyProperty])) {
             return;
         }
+
         this.dispatchEvent(new CustomEvent('select', {
             detail: {
                 model: event.model.item
