@@ -197,13 +197,12 @@ class PlCombobox extends PlElement {
                         i._opened = true;
                     }
                 });
-
-                this._filteredData = [...filtered];
+                this.splice('_filteredData',0,this._filteredData.length,...filtered);
             } else {
                 this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
             }
         } else {
-            this._filteredData = [...this.data];
+            this.splice('_filteredData',0,this._filteredData.length,...this.data);
         }
     }
 
