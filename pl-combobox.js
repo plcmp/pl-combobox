@@ -356,7 +356,9 @@ class PlCombobox extends PlElement {
             }));
 
             elemetsToDelete.forEach((del => {
-                this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
+                if(this.selectedList.find( x[this.valueProperty] == del)) {
+                    this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
+                }
             }));
 
             this.$.input.validate();
