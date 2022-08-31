@@ -394,10 +394,11 @@ class PlCombobox extends PlElement {
 
     _ddOpenedObserver(val) {
         if (this._ddOpened) {
-            this.$.dd.open(this.$.input.$.inputContainer);
+            this.$.dd.open(this.$.input.$.inputContainer, document.body);
             this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
-            this.$.dd.reFit(this.$.input.$.inputContainer);
-
+            setTimeout(() => {
+                this.$.dd.reFit(this.$.input.$.inputContainer, document.body);
+            }, 0);
             this._searchText = null;
         } else {
             this.$.dd.close();
