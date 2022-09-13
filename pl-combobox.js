@@ -16,6 +16,8 @@ class PlCombobox extends PlElement {
         value: { type: String, value: null, observer: '_valueObserver' },
         text: { type: String, observer: '_textObserver' },
         selected: { type: Object, value: null },
+        contentWidth: { type: Number },
+        labelWidth: { type: Number },
 
         label: { type: String },
         required: { type: Boolean },
@@ -99,7 +101,7 @@ class PlCombobox extends PlElement {
     `;
 
     static template = html`
-        <pl-input stretch="[[stretch]]" readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]"
+        <pl-input content-width="[[contentWidth]]" label-width="[[labelWidth]]" stretch="[[stretch]]" readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]"
             value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]"
             on-click="[[_onOpen]]">
             <slot name="prefix" slot="prefix"></slot>
