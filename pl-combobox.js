@@ -224,6 +224,9 @@ class PlCombobox extends PlElement {
 
     _onToggle(event) {
         if(!this.readonly) {
+            if(this._ddOpened) {
+                event.stopImmediatePropagation();
+            }
             this._ddOpened = !this._ddOpened;
         }
     }
