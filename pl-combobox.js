@@ -430,7 +430,6 @@ class PlCombobox extends PlElement {
     }
 
     getItemsContent(multiSelect,variant,selectedList) {
-        console.log(multiSelect,variant)
         if (multiSelect) {
             switch (variant) {
                 case 'tags':
