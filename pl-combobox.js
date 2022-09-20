@@ -68,7 +68,7 @@ class PlCombobox extends PlElement {
         pl-dropdown {
             background: var(--surface-color);
             border-radius: var(--border-radius);
-            box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
             max-height: 254px;
             min-width: var(--content-width);
             box-sizing: border-box;
@@ -98,6 +98,10 @@ class PlCombobox extends PlElement {
             white-space: nowrap;
             overflow: hidden;
         }
+        .tag-cont {
+          display: flex;
+          flex-wrap: wrap;
+        }
     `;
     static itemsTemplate = html`<template d:repeat="[[selectedList]]">
         <div class="tag">
@@ -110,7 +114,7 @@ class PlCombobox extends PlElement {
             value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]"
             on-click="[[_onOpen]]">
             <slot name="prefix" slot="prefix"></slot>
-            <div slot="input">[[getItemsContent(multiSelect,variant,selectedList)]]</div>
+            <div slot="input" class="tag-cont">[[getItemsContent(multiSelect,variant,selectedList)]]</div>
             <slot name="suffix" slot="suffix"></slot>
             <slot name="label-prefix" slot="label-prefix"></slot>
             <slot name="label-suffix" slot="label-suffix"></slot>
@@ -159,13 +163,13 @@ class PlCombobox extends PlElement {
 
     }
 
-    validator(value) {
+    validator() {
         let messages = [];
         if(this.multiSelect) {
-            if(this.valueList.length == 0 && this.required) {
+            if(this.valueList.length === 0 && this.required) {
                 messages.push('Значение не может быть пустым');
             } 
-        } else if((this.value == null || this.value == undefined) && this.required) {
+        } else if((this.value === null || this.value === undefined) && this.required) {
                 messages.push('Значение не может быть пустым');
             }
 
@@ -178,7 +182,7 @@ class PlCombobox extends PlElement {
                 let parents = new Set();
                 let filtered = new Set(this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase())));
                 filtered.forEach((item) => {
-                    if (item[this.pkeyProperty] != null && item[this.pkeyProperty] != undefined) {
+                    if (item[this.pkeyProperty] != null && item[this.pkeyProperty] !== undefined) {
                         parents.add(item[this.pkeyProperty]);
                     }
                 });
@@ -206,10 +210,10 @@ class PlCombobox extends PlElement {
     }
 
     _isClearHidden() {
-        return this.readonly || !this.value && this.valueList.length == 0;
+        return this.readonly || !this.value && this.valueList.length === 0;
     }
 
-    _onOpen(event) {
+    _onOpen() {
         if(!this.readonly) {
             this._ddOpened = true;
         }
@@ -237,7 +241,7 @@ class PlCombobox extends PlElement {
     _onRemoveTagClick(event) {
         event.stopPropagation();
 
-        this.splice('valueList', this.valueList.findIndex(x => x == event.model.item[this.valueProperty]), 1);
+        this.splice('valueList', this.valueList.findIndex(x => x === event.model.item[this.valueProperty]), 1);
     }
 
     _getTagText(item) {
@@ -282,7 +286,7 @@ class PlCombobox extends PlElement {
             this._valueListObserver(this.valueList, null, { action: 'upd', value: this.valueList })
         } else {
             const val = this.__storedValue !== undefined ? this.__storedValue : this.value;
-            if (this.get('value') != val) {
+            if (this.get('value') !== val) {
                 this.set('value', val);
             } else {
                 this.__setText();
@@ -308,9 +312,9 @@ class PlCombobox extends PlElement {
         if (this.inStack) { return; }
         let found;
         if (this.data) {
-            found = this.data.find((item, index) => {
+            found = this.data.find(item => {
                 const value = item[this.valueProperty];
-                if (value == newValue) {
+                if (value === newValue) {
                     this.selected = item;
                     this.__setText(item[this.textProperty]);
                     return true;
@@ -332,13 +336,13 @@ class PlCombobox extends PlElement {
 
     _valueListObserver(newValues, old, mut) {
         let elementsToAdd = [];
-        let elemetsToDelete = [];
+        let elementsToDelete = [];
         if (this.data && this.data.length > 0) {
             if (mut.action === 'upd' && mut.value.length > 0) {
                 elementsToAdd = newValues;
             }
-            if (mut.action === 'upd' && mut.value.length == 0) {
-                elemetsToDelete = mut.oldValue || [];
+            if (mut.action === 'upd' && mut.value.length === 0) {
+                elementsToDelete = mut.oldValue || [];
             }
 
             if (mut.action === 'splice' && mut.added?.length > 0) {
@@ -346,20 +350,20 @@ class PlCombobox extends PlElement {
             }
 
             if (mut.action === 'splice' && mut.deleted?.length > 0) {
-                elemetsToDelete = mut.deleted || [];
+                elementsToDelete = mut.deleted || [];
             }
 
             elementsToAdd.forEach((x => {
-                let item = this.data.find(f => f[this.valueProperty] == x);
+                let item = this.data.find(f => f[this.valueProperty] === x);
                 if (item) {
                     if (!this.selectedList.includes(item))
                         this.push('selectedList', item);
                 }
             }));
 
-            elemetsToDelete.forEach((del => {
-                if(this.selectedList.find(x => x[this.valueProperty] == del)) {
-                    this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
+            elementsToDelete.forEach((del => {
+                if(this.selectedList.find(x => x[this.valueProperty] === del)) {
+                    this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] === del), 1);
                 }
             }));
 
@@ -373,7 +377,7 @@ class PlCombobox extends PlElement {
             let fValue = false;
             this.data && (fValue = this.data.find((item) => {
                 const text = item[this.textProperty];
-                if (text == newValue) {
+                if (text === newValue) {
                     this.__setValue(item[this.valueProperty]);
                     return true;
                 }
@@ -394,7 +398,7 @@ class PlCombobox extends PlElement {
         this._searchText = this._ddOpened ? this.text : null;
     }
 
-    _ddOpenedObserver(val) {
+    _ddOpenedObserver() {
         if (this._ddOpened) {
             this.$.dd.open(this.$.input.$.inputContainer, document.body);
             this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
@@ -412,8 +416,8 @@ class PlCombobox extends PlElement {
     _onSelect(event) {
         this._searchText = null;
         if (this.multiSelect) {
-            let idx = this.valueList.findIndex(x => x == event.detail.model[this.valueProperty]);
-            if (idx == -1) {
+            let idx = this.valueList.findIndex(x => x === event.detail.model[this.valueProperty]);
+            if (idx === -1) {
                 this.push('valueList', event.detail.model[this.valueProperty]);
             } else {
                 this.splice('valueList', idx, 1);
