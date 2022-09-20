@@ -23,7 +23,7 @@ class PlCombobox extends PlElement {
         required: { type: Boolean },
         readonly: { type: Boolean },
         invalid: { type: Boolean },
-        variant: { type: String },
+        variant: { type: String, value: 'text' },
         orientation: { type: String },
         stretch: { type: Boolean, reflectToAttribute: true },
         placeholder: { type: String },
@@ -99,18 +99,18 @@ class PlCombobox extends PlElement {
             overflow: hidden;
         }
     `;
-
+    static itemsTemplate = html`<template d:repeat="[[selectedList]]">
+        <div class="tag">
+            <span class="tag-text" title$=[[_getTagTitle(item)]]>[[_getTagText(item)]]</span>
+            <pl-icon hidden="[[readonly]]" iconset="pl-default" size="16" icon="close-s" on-click="[[_onRemoveTagClick]]"></pl-icon>
+        </div>
+    </template>`;
     static template = html`
         <pl-input content-width="[[contentWidth]]" label-width="[[labelWidth]]" stretch="[[stretch]]" readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]"
             value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]"
             on-click="[[_onOpen]]">
             <slot name="prefix" slot="prefix"></slot>
-            <template d:repeat="[[selectedList]]">
-                <div class="tag" slot="input">
-                    <span class="tag-text" title$=[[_getTagTitle(item)]]>[[_getTagText(item)]]</span>
-                    <pl-icon hidden="[[readonly]]" iconset="pl-default" size="16" icon="close-s" on-click="[[_onRemoveTagClick]]"></pl-icon>
-                </div>
-            </template>
+            <div slot="input">[[getItemsContent(multiSelect,variant,selectedList)]]</div>
             <slot name="suffix" slot="suffix"></slot>
             <slot name="label-prefix" slot="label-prefix"></slot>
             <slot name="label-suffix" slot="label-suffix"></slot>
@@ -157,9 +157,6 @@ class PlCombobox extends PlElement {
 
         resizeObserver.observe(this.$.input.$.inputContainer);
 
-        if (this.variant) {
-            this.orientation = this.variant;
-        }
     }
 
     validator(value) {
@@ -429,6 +426,19 @@ class PlCombobox extends PlElement {
 
             this.selected = event.detail.model;
             this._ddOpened = false;
+        }
+    }
+
+    getItemsContent(multiSelect,variant,selectedList) {
+        console.log(multiSelect,variant)
+        if (multiSelect) {
+            switch (variant) {
+                case 'tags':
+                    return PlCombobox.itemsTemplate;
+                case 'text':
+                default:
+                    return selectedList.length === 0 ? '' : ( this._getTagText(selectedList[0]) + (selectedList.length > 1 ? ` (+${this.selectedList.length - 1})`:''));
+            }
         }
     }
 }
