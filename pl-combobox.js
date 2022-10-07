@@ -54,7 +54,8 @@ class PlCombobox extends PlElement {
 
     static css = css`
         :host {
-            display: inline-block;
+            min-width: 0;
+            flex-shrink: 0;
         }
 
         :host([hidden]) {
@@ -63,6 +64,7 @@ class PlCombobox extends PlElement {
 
         :host([stretch]) {
             width: 100%;
+            flex-shrink: 1;
         }
 
         pl-dropdown {
