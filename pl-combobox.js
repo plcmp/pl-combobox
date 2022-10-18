@@ -18,7 +18,8 @@ class PlCombobox extends PlElement {
         selected: { type: Object, value: null },
         contentWidth: { type: Number },
         labelWidth: { type: Number },
-
+        fitInto: { type: Object, value: null },
+        direction: { type: String, value: 'down'},
         label: { type: String },
         required: { type: Boolean },
         readonly: { type: Boolean },
@@ -76,6 +77,7 @@ class PlCombobox extends PlElement {
             box-sizing: border-box;
             overflow: auto;
             padding: var(--space-md) 0;
+            overscroll-behavior: contain;
         }
 
         .tag {
@@ -125,7 +127,7 @@ class PlCombobox extends PlElement {
             <pl-icon-button variant="link" hidden="[[readonly]]" iconset="pl-default" slot="suffix" size="16" icon="[[_getIcon(_ddOpened)]]"
                 on-click="[[_onToggle]]"></pl-icon-button>
         </pl-input>
-        <pl-dropdown id="dd" opened="{{_ddOpened}}">
+        <pl-dropdown id="dd" opened="{{_ddOpened}}" fit-into=[[fit]] direction="[[direction]]">
             <pl-dom-if if="{{_ddOpened}}">
                 <template>
                     <pl-combobox-list data="[[data]]" tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
@@ -158,7 +160,7 @@ class PlCombobox extends PlElement {
 
         const resizeObserver = new ResizeObserver(() => {
             this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
-            this.$.dd.reFit(this.$.input.$.inputContainer);
+            this.$.dd.reFit(this.$.input.$.inputContainer, this.fitInto);
         });
 
         resizeObserver.observe(this.$.input.$.inputContainer);
@@ -402,11 +404,8 @@ class PlCombobox extends PlElement {
 
     _ddOpenedObserver() {
         if (this._ddOpened) {
-            this.$.dd.open(this.$.input.$.inputContainer, document.body);
+            this.$.dd.open(this.$.input.$.inputContainer, this.fitInto);
             this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
-            setTimeout(() => {
-                this.$.dd.reFit(this.$.input.$.inputContainer, document.body);
-            }, 0);
             this._searchText = null;
         } else {
             this.$.dd.close();
