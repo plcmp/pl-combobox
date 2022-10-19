@@ -72,7 +72,7 @@ class PlCombobox extends PlElement {
             background: var(--surface-color);
             border-radius: var(--border-radius);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            max-height: 254px;
+            max-height: var(--dropdown-max-height, 254px);
             min-width: var(--content-width);
             box-sizing: border-box;
             overflow: auto;
