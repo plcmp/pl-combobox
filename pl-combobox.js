@@ -97,6 +97,10 @@ class PlCombobox extends PlElement {
             cursor: pointer;
         }
 
+        .tag:last-child {
+            margin-right: 2px;
+        }
+
         .tag-text {
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -105,6 +109,7 @@ class PlCombobox extends PlElement {
         .tag-cont {
           display: flex;
           flex-wrap: wrap;
+          gap: 4px;
         }
     `;
     static itemsTemplate = html`<template d:repeat="[[selectedList]]">
@@ -302,12 +307,13 @@ class PlCombobox extends PlElement {
     }
 
     _onClearClick(event) {
+        this.text = null;
+
         if (this.multiSelect) {
             this.valueList = [];
         } else {
             this.value = null;
         }
-        this.text = null;
         this.__storedValue = undefined;
 
         event.stopImmediatePropagation();
