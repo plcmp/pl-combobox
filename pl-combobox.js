@@ -324,7 +324,7 @@ class PlCombobox extends PlElement {
         if (this.data) {
             found = this.data.find(item => {
                 const value = item[this.valueProperty];
-                if (value === newValue) {
+                if (value == newValue) {
                     this.selected = item;
                     this.__setText(item[this.textProperty]);
                     return true;
