@@ -196,7 +196,7 @@ class PlCombobox extends PlElement {
                     }
                 });
                 for (const p of parents) {
-                    const item = this.data.find(i => i[this.keyProperty] === p);
+                    const item = this.data.find(i => i[this.keyProperty] == p);
                     if (item) {
                         filtered.add(item);
                         if (item[this.pkeyProperty] !== null && item[this.pkeyProperty] !== undefined) parents.add(item[this.pkeyProperty]);
@@ -250,7 +250,7 @@ class PlCombobox extends PlElement {
     _onRemoveTagClick(event) {
         event.stopPropagation();
 
-        this.splice('valueList', this.valueList.findIndex(x => x === event.model.item[this.valueProperty]), 1);
+        this.splice('valueList', this.valueList.findIndex(x => x == event.model.item[this.valueProperty]), 1);
     }
 
     _getTagText(item) {
@@ -363,17 +363,14 @@ class PlCombobox extends PlElement {
                 elementsToDelete = mut.deleted || [];
             }
 
-            elementsToAdd.forEach((x => {
-                let item = this.data.find(f => f[this.valueProperty] === x);
-                if (item) {
-                    if (!this.selectedList.includes(item))
-                        this.push('selectedList', item);
-                }
-            }));
+            elementsToAdd.forEach((add) => {
+                if (!this.selectedList.find(x => x[this.valueProperty] == add))
+                    this.push('selectedList', this.data.find(x => x[this.valueProperty] == add));
+            });
 
             elementsToDelete.forEach((del => {
-                if(this.selectedList.find(x => x[this.valueProperty] === del)) {
-                    this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] === del), 1);
+                if(this.selectedList.find(x => x[this.valueProperty] == del)) {
+                    this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
                 }
             }));
 
@@ -423,7 +420,7 @@ class PlCombobox extends PlElement {
     _onSelect(event) {
         this._searchText = null;
         if (this.multiSelect) {
-            let idx = this.valueList.findIndex(x => x === event.detail.model[this.valueProperty]);
+            let idx = this.valueList.findIndex(x => x == event.detail.model[this.valueProperty]);
             if (idx === -1) {
                 this.push('valueList', event.detail.model[this.valueProperty]);
             } else {
