@@ -310,7 +310,7 @@ class PlCombobox extends PlElement {
         this.text = null;
 
         if (this.multiSelect) {
-            this.valueList = [];
+            this.splice('valueList', 0, this.valueList.length);
         } else {
             this.value = null;
         }
@@ -349,10 +349,8 @@ class PlCombobox extends PlElement {
         let elementsToDelete = [];
         if (this.data && this.data.length > 0) {
             if (mut.action === 'upd' && mut.value.length > 0) {
+                elementsToDelete = this.selectedList.map(x => x[this.valueProperty]);
                 elementsToAdd = newValues;
-            }
-            if (mut.action === 'upd' && mut.value.length === 0) {
-                elementsToDelete = mut.oldValue || [];
             }
 
             if (mut.action === 'splice' && mut.added?.length > 0) {
@@ -363,16 +361,16 @@ class PlCombobox extends PlElement {
                 elementsToDelete = mut.deleted || [];
             }
 
+            elementsToDelete.forEach((del => {
+                if (this.selectedList.find(x => x[this.valueProperty] == del)) {
+                    this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
+                }
+            }));
+
             elementsToAdd.forEach((add) => {
                 if (!this.selectedList.find(x => x[this.valueProperty] == add))
                     this.push('selectedList', this.data.find(x => x[this.valueProperty] == add));
             });
-
-            elementsToDelete.forEach((del => {
-                if(this.selectedList.find(x => x[this.valueProperty] == del)) {
-                    this.splice('selectedList', this.selectedList.findIndex(x => x[this.valueProperty] == del), 1);
-                }
-            }));
 
             this.$.input.validate();
         }
@@ -437,14 +435,14 @@ class PlCombobox extends PlElement {
         }
     }
 
-    getItemsContent(multiSelect,variant,selectedList) {
+    getItemsContent(multiSelect, variant, selectedList) {
         if (multiSelect) {
             switch (variant) {
                 case 'tags':
                     return PlCombobox.itemsTemplate;
                 case 'text':
                 default:
-                    return selectedList.length === 0 ? '' : ( this._getTagText(selectedList[0]) + (selectedList.length > 1 ? ` (+${this.selectedList.length - 1})`:''));
+                    return selectedList.length === 0 ? '' : (this._getTagText(selectedList[0]) + (selectedList.length > 1 ? ` (+${this.selectedList.length - 1})` : ''));
             }
         }
     }
