@@ -72,11 +72,12 @@ class PlCombobox extends PlElement {
             background: var(--surface-color);
             border-radius: var(--border-radius);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--grey-lightest);
             max-height: var(--dropdown-max-height, 254px);
             min-width: var(--content-width);
             box-sizing: border-box;
             overflow: auto;
-            padding: var(--space-md) 0;
+            padding: 0;
             overscroll-behavior: contain;
         }
 
@@ -348,7 +349,7 @@ class PlCombobox extends PlElement {
         let elementsToAdd = [];
         let elementsToDelete = [];
         if (this.data && this.data.length > 0) {
-            if (mut.action === 'upd') {
+            if (mut.action === 'upd' && mut.value.length > 0) {
                 elementsToDelete = this.selectedList.map(x => x[this.valueProperty]);
                 elementsToAdd = newValues;
             }

@@ -19,21 +19,16 @@ class PlComboboxList extends PlElement {
 
     static css = css`
         :host {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        #ddContainer {
-            display: block;
-        }
-
-        pl-virtual-scroll {
-            display: none;
+            padding: var(--space-md) 0;
+            display: flex;
+            flex-direction: column;
+            overflow: auto;
+            gap: 4px;
         }
 
         .comboitem {
             box-sizing: border-box;
-            padding: 0 var(--space-sm);
+            padding: 4px var(--space-sm);
             min-height: var(--base-size-md);
             width: 100%;
             font: var(--text-font);
@@ -41,7 +36,6 @@ class PlComboboxList extends PlElement {
             display: flex;
             align-items: center;
             cursor: pointer;
-            gap: 8px;
         }
 
         .comboitem:hover {
@@ -50,22 +44,20 @@ class PlComboboxList extends PlElement {
     `;
 
     static template = html`
-            <div id="ddContainer">
-                <template d:repeat="{{_vdata}}">
-                    <div class="comboitem" on-click="[[_onSelect]]">
-                        <span class="tree-cell" style$="[[_getRowPadding(item)]]">
-                            <pl-icon-button variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]"
-                                on-click="[[_onTreeNodeClick]]"></pl-icon-button>
-                        </span>
-                        <pl-dom-if if="[[_isCheckBoxHidden(multiSelect, selectOnlyLeaf, item)]]">
-                            <template>
-                                <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-                            </template>
-                        </pl-dom-if>
-                        <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
-                    </div>
-                </template>
-            </div>
+            <template d:repeat="{{_vdata}}">
+                <div class="comboitem" on-click="[[_onSelect]]">
+                    <span class="tree-cell" style$="[[_getRowPadding(item)]]">
+                        <pl-icon-button variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]"
+                            on-click="[[_onTreeNodeClick]]"></pl-icon-button>
+                    </span>
+                    <pl-dom-if if="[[_isCheckBoxHidden(multiSelect, selectOnlyLeaf, item)]]">
+                        <template>
+                            <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
+                        </template>
+                    </pl-dom-if>
+                    <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+                </div>
+            </template>
         `;
 
     _itemSelected(item, valueList) {
