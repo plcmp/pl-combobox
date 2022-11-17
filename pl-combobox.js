@@ -349,7 +349,7 @@ class PlCombobox extends PlElement {
         let elementsToAdd = [];
         let elementsToDelete = [];
         if (this.data && this.data.length > 0) {
-            if (mut.action === 'upd' && mut.value.length > 0) {
+            if (mut.action === 'upd') {
                 elementsToDelete = this.selectedList.map(x => x[this.valueProperty]);
                 elementsToAdd = newValues;
             }
