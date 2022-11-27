@@ -68,6 +68,10 @@ class PlCombobox extends PlElement {
             flex-shrink: 1;
         }
 
+        :host([disabled]) pl-icon-button {
+            pointer-events: none;
+        }
+
         pl-dropdown {
             background: var(--surface-color);
             border-radius: var(--border-radius);
@@ -224,7 +228,7 @@ class PlCombobox extends PlElement {
     }
 
     _onOpen() {
-        if(!this.readonly) {
+        if(!this.readonly && !this.disabled) {
             this._ddOpened = true;
         }
     }
