@@ -1,4 +1,6 @@
 import { html, PlElement, css } from "polylib";
+import '@plcmp/pl-icon-button';
+import '@plcmp/pl-checkbox';
 
 class PlComboboxList extends PlElement {
     static properties = {
@@ -43,23 +45,41 @@ class PlComboboxList extends PlElement {
         }
     `;
 
-    static template = html`
-            <template d:repeat="{{_vdata}}">
-                <div class="comboitem" on-click="[[_onSelect]]">
-                    <span class="tree-cell" style$="[[_getRowPadding(item)]]">
-                        <pl-icon-button variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]"
-                            on-click="[[_onTreeNodeClick]]"></pl-icon-button>
-                    </span>
-                    <pl-dom-if if="[[_isCheckBoxHidden(multiSelect, selectOnlyLeaf, item)]]">
-                        <template>
-                            <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-                        </template>
-                    </pl-dom-if>
-                    <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
-                </div>
-            </template>
-        `;
 
+    static plainTemplate = html`
+        <template d:repeat="{{_vdata}}">
+            <div class="comboitem" on-click="[[_onSelect]]">
+                <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            </div>
+        </template>`
+
+    static simpleTreeTemplate = html`
+        <template d:repeat="{{_vdata}}">
+            <div class="comboitem" on-click="[[_onSelect]]">
+                <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
+                <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            </div>
+        </template>`
+
+    static simpleMultiTemplate = html`
+        <template d:repeat="{{_vdata}}">
+            <div class="comboitem" on-click="[[_onSelect]]">
+                <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
+                <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            </div>
+        </template>`
+
+    static treeMultiTemplate = html`
+        <template d:repeat="{{_vdata}}">
+            <div class="comboitem" on-click="[[_onSelect]]">
+                <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
+                <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
+                <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            </div>
+        </template>`
+
+
+    static template = html`[[getTemplate()]]`;
     _itemSelected(item, valueList) {
         return this.multiSelect && valueList.includes(item[this.valueProperty]);
     }
@@ -71,18 +91,6 @@ class PlComboboxList extends PlElement {
         }
 
         return item[textProperty];
-    }
-
-    _isCheckBoxHidden(multiSelect, selectOnlyLeaf, item) {
-       if(!multiSelect) {
-            return false;
-       }
-
-       if(selectOnlyLeaf) {
-            return !this.data.find(x => x[this.pkeyProperty] == item[this.keyProperty])
-       }
-
-       return true;
     }
 
     _onSelect(event) {
@@ -107,11 +115,8 @@ class PlComboboxList extends PlElement {
         this.set(`_vdata.${idx}._opened`, !event.model.item._opened);
     }
 
-    _getRowPadding(item) {
-        if (this.tree) {
-            return `padding-left: ${item._level * 12 + 'px'}`;
-        }
-        return 'display:none;';
+    _getRowMargin(item) {
+        return `margin-left: ${item._level * 12 + 'px'}`;
     }
 
     _getTreeIcon(item) {
@@ -120,6 +125,25 @@ class PlComboboxList extends PlElement {
         }
 
         return item._opened ? 'triangle-down' : 'triangle-right';
+    }
+
+
+    getTemplate() {
+        if(!this.tree && !this.multiSelect) {
+            return PlComboboxList.plainTemplate;
+        }
+
+        if(this.tree && !this.multiSelect) {
+            return PlComboboxList.simpleTreeTemplate;
+        }
+
+        if(!this.tree && this.multiSelect) {
+            return PlComboboxList.simpleMultiTemplatel;
+        }
+
+        if(this.tree && this.multiSelect) {
+            return PlComboboxList.treeMultiTemplate;
+        }
     }
 }
 

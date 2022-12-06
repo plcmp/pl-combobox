@@ -49,6 +49,7 @@ class PlCombobox extends PlElement {
 
         _filteredData: { type: Array, value: () => [] },
         _vdata: { type: Array, value: () => [] },
+        _openedForDomIf: { type: Boolean, value: false},
         _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
         _searchText: { type: Boolean, value: null, observer: '_searchTextObserver' },
     };
@@ -138,7 +139,7 @@ class PlCombobox extends PlElement {
                 on-click="[[_onToggle]]"></pl-icon-button>
         </pl-input>
         <pl-dropdown id="dd" opened="{{_ddOpened}}" fit-into=[[fit]] direction="[[direction]]">
-            <pl-dom-if if="{{_ddOpened}}">
+            <pl-dom-if if="{{_openedForDomIf}}">
                 <template>
                     <pl-combobox-list data="[[data]]" tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
                         _vdata="{{_vdata}}" text-property="[[textProperty]]"
@@ -156,7 +157,6 @@ class PlCombobox extends PlElement {
 
     connectedCallback() {
         super.connectedCallback();
-
         this.$.input.validators = [this.validator.bind(this)];
 
         this.$.dd._close = e => {
@@ -229,7 +229,10 @@ class PlCombobox extends PlElement {
 
     _onOpen() {
         if(!this.readonly && !this.disabled) {
-            this._ddOpened = true;
+            this._openedForDomIf = true;
+            this.$.dd.open(this.$.input.$.inputContainer, this.fitInto);
+            this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
+            this._searchText = null;
         }
     }
 
@@ -237,12 +240,16 @@ class PlCombobox extends PlElement {
         return opened ? 'chevron-up' : 'chevron-down';
     }
 
-    _onToggle(event) {
+    _onToggle() {
         if(!this.readonly) {
-            if(this._ddOpened) {
-                event.stopImmediatePropagation();
+            if (this.$.dd.opened) {
+                this.$.dd.opened.close();
+            } else {
+                this._openedForDomIf = true;
+                this.$.dd.open(this.$.input.$.inputContainer, this.fitInto);
+                this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
+                this._searchText = null;
             }
-            this._ddOpened = !this._ddOpened;
         }
     }
 
@@ -409,13 +416,7 @@ class PlCombobox extends PlElement {
     }
 
     _ddOpenedObserver() {
-        if (this._ddOpened) {
-            this.$.dd.open(this.$.input.$.inputContainer, this.fitInto);
-            this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
-            this._searchText = null;
-        } else {
-            this.$.dd.close();
-            this._searchText = null;
+        if (!this._ddOpened) {
             this._valueObserver(this.value);
         }
     }
