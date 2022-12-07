@@ -240,9 +240,10 @@ class PlCombobox extends PlElement {
         return opened ? 'chevron-up' : 'chevron-down';
     }
 
-    _onToggle() {
+    _onToggle(event) {
         if(!this.readonly) {
             if (this.$.dd.opened) {
+                event.stopImmediatePropagation();
                 this.$.dd.close();
             } else {
                 this._openedForDomIf = true;
