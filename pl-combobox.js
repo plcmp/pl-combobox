@@ -243,7 +243,7 @@ class PlCombobox extends PlElement {
     _onToggle() {
         if(!this.readonly) {
             if (this.$.dd.opened) {
-                this.$.dd.opened.close();
+                this.$.dd.close();
             } else {
                 this._openedForDomIf = true;
                 this.$.dd.open(this.$.input.$.inputContainer, this.fitInto);
