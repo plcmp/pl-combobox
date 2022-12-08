@@ -40,7 +40,7 @@ class PlCombobox extends PlElement {
         valueList: { type: Array, value: () => [], observer: '_valueListObserver' },
         selectedList: { type: Array, value: () => [] },
 
-        tree: { type: Boolean, value: false },
+        tree: { type: Boolean, observer: '_treeModeChange' },
         keyProperty: { type: String },
         pkeyProperty: { type: String },
         hasChildProperty: { type: String, value: '_haschildren' },
@@ -175,6 +175,11 @@ class PlCombobox extends PlElement {
 
         resizeObserver.observe(this.$.input.$.inputContainer);
 
+        setTimeout(() => {
+            if (this.data?.control) {
+                this._treeModeChange();
+            }
+        }, 0);
     }
 
     validator() {
@@ -236,6 +241,18 @@ class PlCombobox extends PlElement {
         }
     }
 
+    _treeModeChange() {
+        if (this.data.control && this.tree) {
+            this.data.control.treeMode = {
+                hidValue: undefined,
+                keyField: this.keyProperty,
+                hidField: this.pkeyProperty
+            };
+        } else if (this.data.control) {
+            delete this.data.control.treeMode;
+        }
+    }
+
     _getIcon(opened) {
         return opened ? 'chevron-up' : 'chevron-down';
     }
@@ -283,10 +300,6 @@ class PlCombobox extends PlElement {
     _dataObserver(newData) {
         if (this.inStack) { return; }
 
-        this.inStack = true;
-        this.set('data', []);
-        this.set('_filteredData', []);
-        this.inStack = false;
         if (!newData || !newData.length) {
             return;
         }
