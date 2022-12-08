@@ -47,39 +47,31 @@ class PlComboboxList extends PlElement {
 
 
     static plainTemplate = html`
-        <template d:repeat="{{_vdata}}">
-            <div class="comboitem" on-click="[[_onSelect]]">
-                <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
-            </div>
-        </template>`
+        <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
+            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+        </div>`
 
     static simpleTreeTemplate = html`
-        <template d:repeat="{{_vdata}}">
-            <div class="comboitem" on-click="[[_onSelect]]">
-                <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
-                <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
-            </div>
-        </template>`
+        <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
+            <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
+            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+        </div>`
 
     static simpleMultiTemplate = html`
-        <template d:repeat="{{_vdata}}">
-            <div class="comboitem" on-click="[[_onSelect]]">
-                <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-                <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
-            </div>
-        </template>`
+        <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
+            <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
+            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+        </div>`
 
     static treeMultiTemplate = html`
-        <template d:repeat="{{_vdata}}">
-            <div class="comboitem" on-click="[[_onSelect]]">
-                <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
-                <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-                <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
-            </div>
-        </template>`
-
+        <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
+            <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
+            <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
+            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+        </div>`
 
     static template = html`[[getTemplate()]]`;
+    
     _itemSelected(item, valueList) {
         return this.multiSelect && valueList.includes(item[this.valueProperty]);
     }
@@ -138,7 +130,7 @@ class PlComboboxList extends PlElement {
         }
 
         if(!this.tree && this.multiSelect) {
-            return PlComboboxList.simpleMultiTemplatel;
+            return PlComboboxList.simpleMultiTemplate;
         }
 
         if(this.tree && this.multiSelect) {
