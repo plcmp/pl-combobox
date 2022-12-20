@@ -19,12 +19,12 @@ class PlCombobox extends PlElement {
         contentWidth: { type: Number },
         labelWidth: { type: Number },
         fitInto: { type: Object, value: null },
-        direction: { type: String, value: 'down'},
+        direction: { type: String, value: 'down' },
         label: { type: String },
         required: { type: Boolean },
         readonly: { type: Boolean },
         invalid: { type: Boolean },
-        variant: { type: String, value: 'text' },
+        variant: { type: String, value: 'text', observer: '_variantObserver' },
         orientation: { type: String },
         stretch: { type: Boolean, reflectToAttribute: true },
         placeholder: { type: String },
@@ -36,9 +36,9 @@ class PlCombobox extends PlElement {
         hidden: { type: Boolean, reflectToAttribute: true },
 
         allowCustomValue: { type: Boolean, value: false },
-        multiSelect: { type: Boolean, value: false },
+        multiSelect: { type: Boolean, value: false, observer: '_multiSelectObserver' },
         valueList: { type: Array, value: () => [], observer: '_valueListObserver' },
-        selectedList: { type: Array, value: () => [] },
+        selectedList: { type: Array, value: () => [], observer: '_multiSelectObserver' },
 
         tree: { type: Boolean, observer: '_treeModeChange' },
         keyProperty: { type: String },
@@ -49,9 +49,11 @@ class PlCombobox extends PlElement {
 
         _filteredData: { type: Array, value: () => [] },
         _vdata: { type: Array, value: () => [] },
-        _openedForDomIf: { type: Boolean, value: false},
+        _openedForDomIf: { type: Boolean, value: false },
         _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
         _searchText: { type: Boolean, value: null, observer: '_searchTextObserver' },
+       
+        _multiTemplate: { type: Object }
     };
 
     static css = css`
@@ -70,6 +72,10 @@ class PlCombobox extends PlElement {
         }
 
         :host([disabled]) pl-icon-button {
+            pointer-events: none;
+        }
+
+        :host([disabled]) pl-icon {
             pointer-events: none;
         }
 
@@ -112,37 +118,52 @@ class PlCombobox extends PlElement {
             white-space: nowrap;
             overflow: hidden;
         }
+
         .tag-cont {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 4px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .text-cont {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
         }
     `;
-    static itemsTemplate = html`<template d:repeat="[[selectedList]]">
-        <div class="tag">
-            <span class="tag-text" title$=[[_getTagTitle(item)]]>[[_getTagText(item)]]</span>
-            <pl-icon hidden="[[readonly]]" iconset="pl-default" size="16" icon="close-s" on-click="[[_onRemoveTagClick]]"></pl-icon>
+    static tagsTemplate = html`
+        <div slot="input" class="tag-cont">
+            <div class="tag" d:repeat="[[selectedList]]">
+                <span class="tag-text" title$=[[_getTagTitle(item)]]>[[_getTagText(item)]]</span>
+                <pl-icon hidden="[[readonly]]" iconset="pl-default" size="16" icon="close-s" on-click="[[_onRemoveTagClick]]"></pl-icon>
+            </div>
         </div>
-    </template>`;
+    `;
+
+    static textTemplate = html`
+        <div slot="input" class="text-cont" title$=[[_getTitleForMulti(selectedList)]]>
+            [[_getTextForMulti(selectedList)]]
+        </div>
+    `;
     static template = html`
-        <pl-input content-width="[[contentWidth]]" label-width="[[labelWidth]]" stretch="[[stretch]]" readonly="[[readonly]]" disabled="{{disabled}}" id="input" placeholder="[[placeholder]]"
-            value="{{text}}" required="[[required]]" invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]"
-            on-click="[[_onOpen]]">
+        <pl-input content-width="[[contentWidth]]" label-width="[[labelWidth]]" stretch="[[stretch]]" readonly="[[readonly]]"
+            disabled="{{disabled}}" id="input" placeholder="[[_getPlaceholder(placeholder, valueList)]]" value="{{text}}" required="[[required]]"
+            invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]" on-click="[[_onOpen]]">
             <slot name="prefix" slot="prefix"></slot>
-            <div slot="input" class="tag-cont">[[getItemsContent(multiSelect,variant,selectedList)]]</div>
+            [[_multiTemplate]]
             <slot name="suffix" slot="suffix"></slot>
             <slot name="label-prefix" slot="label-prefix"></slot>
             <slot name="label-suffix" slot="label-suffix"></slot>
-            <pl-icon-button variant="link" hidden="[[_isClearHidden(value, valueList, readonly)]]" slot="suffix" iconset="pl-default"
-                size="12" icon="close" on-click="[[_onClearClick]]"></pl-icon-button>
-            <pl-icon-button variant="link" hidden="[[readonly]]" iconset="pl-default" slot="suffix" size="16" icon="[[_getIcon(_ddOpened)]]"
-                on-click="[[_onToggle]]"></pl-icon-button>
+            <pl-icon-button variant="link" hidden="[[_isClearHidden(value, valueList, readonly)]]" slot="suffix"
+                iconset="pl-default" size="12" icon="close" on-click="[[_onClearClick]]"></pl-icon-button>
+            <pl-icon-button variant="link" hidden="[[readonly]]" iconset="pl-default" slot="suffix" size="16"
+                icon="[[_getIcon(_ddOpened)]]" on-click="[[_onToggle]]"></pl-icon-button>
         </pl-input>
         <pl-dropdown id="dd" opened="{{_ddOpened}}" fit-into=[[fit]] direction="[[direction]]">
             <pl-dom-if if="{{_openedForDomIf}}">
                 <template>
-                    <pl-combobox-list data="[[data]]" tree="[[tree]]" multi-select="[[multiSelect]]" select-only-leaf="[[selectOnlyLeaf]]"
-                        _vdata="{{_vdata}}" text-property="[[textProperty]]"
+                    <pl-combobox-list data="[[data]]" tree="[[tree]]" multi-select="[[multiSelect]]"
+                        select-only-leaf="[[selectOnlyLeaf]]" _vdata="{{_vdata}}" text-property="[[textProperty]]"
                         value-property="[[valueProperty]]" key-property="[[keyProperty]]" pkey-property="[[pkeyProperty]]"
                         selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]"
                         _search="[[_searchText]]">
@@ -182,15 +203,39 @@ class PlCombobox extends PlElement {
         }, 0);
     }
 
+    _getPlaceholder(placeholder, valueList){
+        if(this.multiSelect && this.valueList.length > 0) {
+            return '';
+        } else{
+            return placeholder || '';
+        }
+    }
+
+    _variantObserver() {
+        this._multiSelectObserver();
+    }
+
+    _multiSelectObserver() {
+        if(this.multiSelect) {
+            if(this._multiTemplate != PlCombobox.tagsTemplate && this.variant == 'tags') {
+                this._multiTemplate = PlCombobox.tagsTemplate;
+            } 
+
+            if(this._multiTemplate != PlCombobox.textTemplate && this.variant == 'text') {
+                this._multiTemplate = PlCombobox.textTemplate;
+            }
+        }
+    }
+
     validator() {
         let messages = [];
-        if(this.multiSelect) {
-            if(this.valueList.length === 0 && this.required) {
-                messages.push('Значение не может быть пустым');
-            } 
-        } else if((this.value === null || this.value === undefined) && this.required) {
+        if (this.multiSelect) {
+            if (this.valueList.length === 0 && this.required) {
                 messages.push('Значение не может быть пустым');
             }
+        } else if ((this.value === null || this.value === undefined) && this.required) {
+            messages.push('Значение не может быть пустым');
+        }
 
         return messages.length > 0 ? messages.join(';') : undefined;
     }
@@ -219,12 +264,12 @@ class PlCombobox extends PlElement {
                         i._opened = true;
                     }
                 });
-                this.splice('_filteredData',0,this._filteredData.length,...filtered);
+                this.splice('_filteredData', 0, this._filteredData.length, ...filtered);
             } else {
                 this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
             }
         } else {
-            this.splice('_filteredData',0,this._filteredData.length,...this.data);
+            this.splice('_filteredData', 0, this._filteredData.length, ...this.data);
         }
     }
 
@@ -233,7 +278,7 @@ class PlCombobox extends PlElement {
     }
 
     _onOpen() {
-        if(!this.readonly && !this.disabled) {
+        if (!this.readonly && !this.disabled) {
             this._openedForDomIf = true;
             this.$.dd.open(this.$.input.$.inputContainer, this.fitInto);
             this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
@@ -258,7 +303,7 @@ class PlCombobox extends PlElement {
     }
 
     _onToggle(event) {
-        if(!this.readonly) {
+        if (!this.readonly) {
             if (this.$.dd.opened) {
                 event.stopImmediatePropagation();
                 this.$.dd.close();
@@ -455,16 +500,16 @@ class PlCombobox extends PlElement {
         }
     }
 
-    getItemsContent(multiSelect, variant, selectedList) {
-        if (multiSelect) {
-            switch (variant) {
-                case 'tags':
-                    return PlCombobox.itemsTemplate;
-                case 'text':
-                default:
-                    return selectedList.length === 0 ? '' : (this._getTagText(selectedList[0]) + (selectedList.length > 1 ? ` (+${this.selectedList.length - 1})` : ''));
-            }
-        }
+    _getTextForMulti(selectedList) {
+        return selectedList.length === 0 ? '' : (this._getTagText(selectedList[0]) + (selectedList.length > 1 ? ` (+${this.selectedList.length - 1})` : ''));
+    }
+
+    _getTitleForMulti(selectedList) {
+        if(selectedList.length == 0) {
+            return '';
+        } 
+        
+        return selectedList.map(x => this._getTagText(x)).join('\n');
     }
 }
 
