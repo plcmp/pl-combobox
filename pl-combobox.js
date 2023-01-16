@@ -184,7 +184,6 @@ class PlCombobox extends PlElement {
             let path = e.composedPath();
             if (!path.includes(this)) {
                 e.preventDefault();
-                e.stopPropagation();
                 this.$.dd.close();
             }
         }
