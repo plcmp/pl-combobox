@@ -1,6 +1,6 @@
 {
     "name": "@plcmp/pl-combobox",
-    "version": "0.1.31",
+    "version": "0.1.32",
     "description": "Simple combobox component.",
     "main": "pl-combobox.js",
     "repository": {
