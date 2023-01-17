@@ -179,15 +179,6 @@ class PlCombobox extends PlElement {
     connectedCallback() {
         super.connectedCallback();
         this.$.input.validators = [this.validator.bind(this)];
-
-        this.$.dd._close = e => {
-            let path = e.composedPath();
-            if (!path.includes(this)) {
-                e.preventDefault();
-                this.$.dd.close();
-            }
-        }
-
         const resizeObserver = new ResizeObserver(() => {
             this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
             this.$.dd.reFit(this.$.input.$.inputContainer, this.fitInto);
