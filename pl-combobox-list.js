@@ -73,7 +73,7 @@ class PlComboboxList extends PlElement {
     static template = html`[[getTemplate()]]`;
     
     _itemSelected(item, valueList) {
-        return this.multiSelect && valueList.includes(item[this.valueProperty]);
+        return this.multiSelect && valueList.filter(x => x == item[this.valueProperty]).length > 0;
     }
 
     _itemText(item, textProperty, search) {

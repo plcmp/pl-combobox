@@ -38,7 +38,7 @@ class PlCombobox extends PlElement {
         allowCustomValue: { type: Boolean, value: false },
         multiSelect: { type: Boolean, value: false, observer: '_multiSelectObserver' },
         valueList: { type: Array, value: () => [], observer: '_valueListObserver' },
-        selectedList: { type: Array, value: () => [], observer: '_multiSelectObserver' },
+        selectedList: { type: Array, value: () => [], observer: '_selectedListtObserver' },
 
         tree: { type: Boolean, observer: '_treeModeChange' },
         keyProperty: { type: String },
@@ -361,7 +361,19 @@ class PlCombobox extends PlElement {
             this.set('_filteredData', Array.from(this.data));
         }
         if (this.multiSelect) {
-            this._valueListObserver(this.valueList, null, { action: 'upd', value: this.valueList })
+            this.inStack = true;
+
+            if(this.valueList.length > 0) {
+                let selected = [];
+                this.valueList.forEach((el) => {
+                    selected.push(this.data.find(x => x[this.valueProperty] == el));
+                });
+                this.selectedList = selected;
+            } else if(this.selectedList.length > 0) {
+                this.valueList = this.selectedList.map(x => x[this.valueProperty]);
+            }
+            
+            this.inStack = false;
         } else {
             const val = this.__storedValue !== undefined ? this.__storedValue : this.value;
             if (this.get('value') !== val) {
@@ -414,6 +426,8 @@ class PlCombobox extends PlElement {
     }
 
     _valueListObserver(newValues, old, mut) {
+        if (this.inStack) { return; }
+        this.inStack = true;
         let elementsToAdd = [];
         let elementsToDelete = [];
         if (this.data && this.data.length > 0) {
@@ -441,8 +455,47 @@ class PlCombobox extends PlElement {
                     this.push('selectedList', this.data.find(x => x[this.valueProperty] == add));
             });
 
-            this.$.input.validate();
         }
+
+        this.$.input.validate();
+        this.inStack = false;
+    }
+
+    _selectedListtObserver(newValues, old, mut) {
+        if (this.inStack) { return; }
+        this.inStack = true;
+        let elementsToAdd = [];
+        let elementsToDelete = [];
+
+        if (this.data && this.data.length > 0) {
+            if (mut.action === 'upd') {
+                elementsToDelete = this.valueList;
+                elementsToAdd = newValues.map(x => x[this.valueProperty]);
+            }
+
+            if (mut.action === 'splice' && mut.added?.length > 0) {
+                elementsToAdd = mut.added.map(x => x[this.valueProperty]);
+            }
+
+            if (mut.action === 'splice' && mut.deleted?.length > 0) {
+                elementsToDelete = mut.deleted.map(x => x[this.valueProperty]) || [];
+            }
+
+            elementsToDelete.forEach((del => {
+                if (this.valueList.find(x => x == del)) {
+                    this.splice('valueList', this.valueList.findIndex(x => x== del), 1);
+                }
+            }));
+
+            elementsToAdd.forEach((add) => {
+                if (!this.valueList.find(x => x == add))
+                    this.push('valueList', add);
+            });
+
+        }
+
+        this.$.input.validate();
+        this.inStack = false;
     }
 
     _textObserver(newValue, oldValue, mut) {
