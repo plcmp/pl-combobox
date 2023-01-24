@@ -48,26 +48,26 @@ class PlComboboxList extends PlElement {
 
     static plainTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
-            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            <p>[[_itemText(item, textProperty, _search)]]</p>
         </div>`
 
     static simpleTreeTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
             <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
-            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            <p>[[_itemText(item, textProperty, _search)]]</p>
         </div>`
 
     static simpleMultiTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
             <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            <p>[[_itemText(item, textProperty, _search)]]</p>
         </div>`
 
     static treeMultiTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
             <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
             <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            <p>[[_itemText(item, textProperty, _search)]]</p>
         </div>`
 
     static template = html`[[getTemplate()]]`;
@@ -78,8 +78,7 @@ class PlComboboxList extends PlElement {
 
     _itemText(item, textProperty, search) {
         if (search) {
-            const txtPart = item[this.textProperty].match(new RegExp(search, 'i'));
-            return item[this.textProperty].replace(new RegExp(search, 'i'), `<b>${txtPart?.[0]}</b>`);
+            return item._textForShow;
         }
 
         return item[textProperty];

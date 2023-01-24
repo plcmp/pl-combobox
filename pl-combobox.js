@@ -244,6 +244,7 @@ class PlCombobox extends PlElement {
                 let parents = new Set();
                 let filtered = new Set(this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase())));
                 filtered.forEach((item) => {
+                    item._textForShow = item[this.textProperty].replace(new RegExp(text, 'i'), `<b>${item[this.textProperty].match(new RegExp(text, 'i'))?.[0]}</b>`);
                     if (item[this.pkeyProperty] != null && item[this.pkeyProperty] !== undefined) {
                         parents.add(item[this.pkeyProperty]);
                     }
@@ -264,7 +265,13 @@ class PlCombobox extends PlElement {
                 });
                 this.splice('_filteredData', 0, this._filteredData.length, ...filtered);
             } else {
-                this._filteredData = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
+                let filtered = this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase()));
+
+                filtered.forEach((item) => {
+                    item._textForShow = item[this.textProperty].replace(new RegExp(text, 'i'), `<b>${item[this.textProperty].match(new RegExp(text, 'i'))?.[0]}</b>`);
+                })
+
+                this._filteredData = filtered;
             }
         } else {
             this.splice('_filteredData', 0, this._filteredData.length, ...this.data);
