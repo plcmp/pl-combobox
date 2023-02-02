@@ -344,6 +344,8 @@ class PlCombobox extends PlElement {
         if (this.inStack) { return; }
 
         if (!newData || !newData.length) {
+            // set empty for correct mutation handling in combo items 
+            this.set('_filteredData', []);
             return;
         }
 
