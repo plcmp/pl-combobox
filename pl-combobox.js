@@ -38,7 +38,7 @@ class PlCombobox extends PlElement {
         allowCustomValue: { type: Boolean, value: false },
         multiSelect: { type: Boolean, value: false, observer: '_multiSelectObserver' },
         valueList: { type: Array, value: () => [], observer: '_valueListObserver' },
-        selectedList: { type: Array, value: () => [], observer: '_selectedListtObserver' },
+        selectedList: { type: Array, value: () => [], observer: '_selectedListObserver' },
 
         tree: { type: Boolean, observer: '_treeModeChange' },
         keyProperty: { type: String },
@@ -130,6 +130,15 @@ class PlCombobox extends PlElement {
             white-space: nowrap;
             overflow: hidden;
         }
+
+        .select-all {
+            padding: 0px 8px;
+            background: var(--grey-lightest);
+            border-bottom: 1px solid var(--grey-base);
+            position: sticky;
+            top: 0px;
+            z-index: 1;
+        }
     `;
     static tagsTemplate = html`
         <div slot="input" class="tag-cont">
@@ -162,6 +171,9 @@ class PlCombobox extends PlElement {
         <pl-dropdown id="dd" opened="{{_ddOpened}}" fit-into=[[fit]] direction="[[direction]]">
             <pl-dom-if if="{{_openedForDomIf}}">
                 <template>
+                    <div class="select-all">
+                        <pl-button variant="link" hidden="[[!multiSelect]]" label="[[_getSelectAllText(data, valueList)]]" on-click="[[onSelectAll]]"></pl-button>
+                    </div>
                     <pl-combobox-list data="[[data]]" tree="[[tree]]" multi-select="[[multiSelect]]"
                         select-only-leaf="[[selectOnlyLeaf]]" _vdata="{{_vdata}}" text-property="[[textProperty]]"
                         value-property="[[valueProperty]]" key-property="[[keyProperty]]" pkey-property="[[pkeyProperty]]"
@@ -175,6 +187,18 @@ class PlCombobox extends PlElement {
             has-child-field="[[hasChildProperty]]" in="{{_filteredData}}" out="{{_vdata}}">
         </pl-data-tree>
     `;
+
+    _getSelectAllText(data, valueList) {
+        return data.length == valueList.length ? 'очистить все' : 'выбрать все';
+    }
+
+    onSelectAll() {
+        if(this.data.length == this.valueList.length) {
+            this.splice('valueList', 0, this.valueList.length);
+        } else {
+            this.splice('valueList', 0, this.valueList.length, ...this.data.map(x => x[this.valueProperty]));
+        }
+    }
 
     connectedCallback() {
         super.connectedCallback();
@@ -463,7 +487,7 @@ class PlCombobox extends PlElement {
         this.inStack = false;
     }
 
-    _selectedListtObserver(newValues, old, mut) {
+    _selectedListObserver(newValues, old, mut) {
         if (this.inStack) { return; }
         this.inStack = true;
         let elementsToAdd = [];
