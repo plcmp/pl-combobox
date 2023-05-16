@@ -21,16 +21,14 @@ class PlComboboxList extends PlElement {
 
     static css = css`
         :host {
-            padding: var(--space-md) 0;
             display: flex;
             flex-direction: column;
             overflow: auto;
-            gap: 4px;
         }
 
         .comboitem {
             box-sizing: border-box;
-            padding: 4px var(--space-sm);
+            padding: 2px var(--space-sm);
             min-height: var(--base-size-md);
             width: 100%;
             font: var(--text-font);
@@ -70,7 +68,7 @@ class PlComboboxList extends PlElement {
             <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
         </div>`
 
-    static template = html`[[getTemplate()]]`;
+    static template = html`[[getTemplate(tree, multiSelect)]]`;
     
     _itemSelected(item, valueList) {
         return this.multiSelect && valueList.filter(x => x == item[this.valueProperty]).length > 0;
