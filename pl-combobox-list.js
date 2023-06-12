@@ -24,6 +24,7 @@ class PlComboboxList extends PlElement {
             display: flex;
             flex-direction: column;
             overflow: auto;
+            max-height: var(--dropdown-max-height, 254px);
         }
 
         .comboitem {

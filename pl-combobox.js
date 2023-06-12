@@ -83,13 +83,10 @@ class PlCombobox extends PlElement {
             background: var(--surface-color);
             border-radius: var(--border-radius);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            border: 1px solid var(--grey-lightest);
-            max-height: var(--dropdown-max-height, 254px);
+            border: 1px solid var(--grey-light);
             min-width: var(--content-width);
             box-sizing: border-box;
-            overflow: auto;
             padding: 0;
-            overscroll-behavior: contain;
         }
 
         .tag {
@@ -132,6 +129,7 @@ class PlCombobox extends PlElement {
         }
 
         .select-all {
+            box-sizing:border-box;
             padding: 0px 8px;
             background: var(--grey-lightest);
             border-bottom: 1px solid var(--grey-base);
@@ -171,6 +169,7 @@ class PlCombobox extends PlElement {
         <pl-dropdown id="dd" opened="{{_ddOpened}}" fit-into=[[fit]] direction="[[direction]]">
             <pl-dom-if if="{{_openedForDomIf}}">
                 <template>
+                    <slot name="dropdown-prefix"></slot>
                     <div class="select-all">
                         <pl-button variant="link" hidden="[[!multiSelect]]" label="[[_getSelectAllText(data, valueList)]]" on-click="[[onSelectAll]]"></pl-button>
                     </div>
@@ -180,6 +179,7 @@ class PlCombobox extends PlElement {
                         selected="{{selected}}" on-select="[[_onSelect]]" text="[[text]]" value-list="[[valueList]]"
                         _search="[[_searchText]]">
                     </pl-combobox-list>
+                    <slot name="dropdown-suffix"></slot>
                 </template>
             </pl-dom-if>
         </pl-dropdown>
