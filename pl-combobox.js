@@ -392,10 +392,22 @@ class PlCombobox extends PlElement {
             if(this.valueList.length > 0) {
                 let selected = [];
                 this.valueList.forEach((el) => {
-                    selected.push(this.data.find(x => x[this.valueProperty] == el));
+                    let found = this.data.find(x => x[this.valueProperty] == el);
+                    if(found) {
+                        selected.push(found);
+                    }
                 });
                 this.selectedList = selected;
+                this.valueList = this.selectedList.map(x => x[this.valueProperty]);
             } else if(this.selectedList.length > 0) {
+                let selected = [];
+                this.selectedList.forEach((el) => {
+                    let found = this.data.find(x => x == el);
+                    if(found) {
+                        selected.push(found);
+                    }
+                });
+                this.selectedList = selected;
                 this.valueList = this.selectedList.map(x => x[this.valueProperty]);
             }
             
