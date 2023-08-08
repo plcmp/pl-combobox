@@ -28,45 +28,55 @@ class PlComboboxList extends PlElement {
         }
 
         .comboitem {
-            box-sizing: border-box;
-            padding: 2px var(--space-sm);
-            min-height: var(--base-size-md);
-            width: 100%;
-            font: var(--text-font);
-            color: var(--text-color);
             display: flex;
+            box-sizing: border-box;
+            width: 100%;
+            height: fit-content;
+
             align-items: center;
             cursor: pointer;
+
+            padding: 2px var(--space-sm);
+            font: var(--text-font);
+            color: var(--text-color);
         }
 
         .comboitem:hover {
             background-color: var(--grey-lightest)
+        }
+
+        .text {
+            display: flex;
+            min-height: var(--base-size-md);
+            width: 100%;
+            align-text: center;
+            align-items: center;
         }
     `;
 
 
     static plainTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
-            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            <div class="text" inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
         </div>`
 
     static simpleTreeTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
             <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
-            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            <div class="text" inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
         </div>`
 
     static simpleMultiTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
             <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            <div class="text" inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
         </div>`
 
     static treeMultiTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">
             <pl-icon-button style$="[[_getRowMargin(item)]]" variant="link" iconset="pl-default" icon="[[_getTreeIcon(item)]]" on-click="[[_onTreeNodeClick]]"></pl-icon-button>
             <pl-checkbox checked="[[_itemSelected(item, valueList)]]"></pl-checkbox>
-            <div inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
+            <div class="text" inner-h-t-m-l="[[_itemText(item, textProperty, _search)]]"></div>
         </div>`
 
     static template = html`[[getTemplate()]]`;
