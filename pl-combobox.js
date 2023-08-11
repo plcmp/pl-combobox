@@ -432,6 +432,7 @@ class PlCombobox extends PlElement {
             this.splice('valueList', 0, this.valueList.length);
         } else {
             this.value = null;
+            this.selected = null;
         }
         this.__storedValue = undefined;
 
