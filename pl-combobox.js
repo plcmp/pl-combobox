@@ -52,7 +52,6 @@ class PlCombobox extends PlElement {
         _openedForDomIf: { type: Boolean, value: false },
         _ddOpened: { type: Boolean, value: false, observer: '_ddOpenedObserver' },
         _searchText: { type: Boolean, value: null, observer: '_searchTextObserver' },
-       
         _multiTemplate: { type: Object }
     };
 
@@ -193,7 +192,7 @@ class PlCombobox extends PlElement {
     }
 
     onSelectAll() {
-        if(this.data.length == this.valueList.length) {
+        if (this.data.length == this.valueList.length) {
             this.splice('valueList', 0, this.valueList.length);
         } else {
             this.splice('valueList', 0, this.valueList.length, ...this.data.map(x => x[this.valueProperty]));
@@ -225,10 +224,10 @@ class PlCombobox extends PlElement {
         }, 0);
     }
 
-    _getPlaceholder(placeholder, valueList){
-        if(this.multiSelect && this.valueList.length > 0) {
+    _getPlaceholder(placeholder, valueList) {
+        if (this.multiSelect && this.valueList.length > 0) {
             return '';
-        } else{
+        } else {
             return placeholder || '';
         }
     }
@@ -238,12 +237,12 @@ class PlCombobox extends PlElement {
     }
 
     _multiSelectObserver() {
-        if(this.multiSelect) {
-            if(this._multiTemplate != PlCombobox.tagsTemplate && this.variant == 'tags') {
+        if (this.multiSelect) {
+            if (this._multiTemplate != PlCombobox.tagsTemplate && this.variant == 'tags') {
                 this._multiTemplate = PlCombobox.tagsTemplate;
-            } 
+            }
 
-            if(this._multiTemplate != PlCombobox.textTemplate && this.variant == 'text') {
+            if (this._multiTemplate != PlCombobox.textTemplate && this.variant == 'text') {
                 this._multiTemplate = PlCombobox.textTemplate;
             }
         }
@@ -389,28 +388,26 @@ class PlCombobox extends PlElement {
         if (this.multiSelect) {
             this.inStack = true;
 
-            if(this.valueList.length > 0) {
+            if (this.valueList.length > 0) {
                 let selected = [];
                 this.valueList.forEach((el) => {
                     let found = this.data.find(x => x[this.valueProperty] == el);
-                    if(found) {
+                    if (found) {
                         selected.push(found);
                     }
                 });
-                this.selectedList = selected;
-                this.valueList = this.selectedList.map(x => x[this.valueProperty]);
-            } else if(this.selectedList.length > 0) {
+                this.splice('selectedList', 0, this.selectedList.length, ...selected);
+            } else if (this.selectedList.length > 0) {
                 let selected = [];
                 this.selectedList.forEach((el) => {
                     let found = this.data.find(x => x == el);
-                    if(found) {
-                        selected.push(found);
+                    if (found) {
+                        selected.push(found[this.valueProperty]);
                     }
                 });
-                this.selectedList = selected;
-                this.valueList = this.selectedList.map(x => x[this.valueProperty]);
+                this.splice('valueList', 0, this.valueList.length, ...selected);
             }
-            
+
             this.inStack = false;
         } else {
             const val = this.__storedValue !== undefined ? this.__storedValue : this.value;
@@ -441,7 +438,7 @@ class PlCombobox extends PlElement {
     _valueObserver(newValue) {
         if (this.inStack) { return; }
         let found;
-        if (this.data) {
+        if (this.data && newValue) {
             found = this.data.find(item => {
                 const value = item[this.valueProperty];
                 if (value == newValue) {
@@ -522,7 +519,7 @@ class PlCombobox extends PlElement {
 
             elementsToDelete.forEach((del => {
                 if (this.valueList.find(x => x == del)) {
-                    this.splice('valueList', this.valueList.findIndex(x => x== del), 1);
+                    this.splice('valueList', this.valueList.findIndex(x => x == del), 1);
                 }
             }));
 
@@ -595,10 +592,10 @@ class PlCombobox extends PlElement {
     }
 
     _getTitleForMulti(selectedList) {
-        if(selectedList.length == 0) {
+        if (selectedList.length == 0) {
             return '';
-        } 
-        
+        }
+
         return selectedList.map(x => this._getTagText(x)).join('\n');
     }
 }
