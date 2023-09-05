@@ -262,7 +262,7 @@ class PlCombobox extends PlElement {
     }
 
     _searchTextObserver(text) {
-        if (text != null && text !== '') {
+        if (text != null && text !== '' && text.length >= 2) {
             if (this.tree) {
                 let parents = new Set();
                 let filtered = new Set(this.data.filter(x => x[this.textProperty].toLowerCase().includes(text.toLowerCase())));
