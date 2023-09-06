@@ -88,7 +88,7 @@ class PlComboboxList extends PlElement {
     _itemText(item, textProperty, search) {
         if (search) {
             const txtPart = item[this.textProperty].match(new RegExp(search, 'i'));
-            return item[this.textProperty].replace(new RegExp(search, 'i'), `<b>${txtPart?.[0]}</b>`);
+            return item[this.textProperty].replaceAll(' ', '&nbsp;').replace(new RegExp(search, 'i'), `<b>${txtPart?.[0]}</b>`);
         }
 
         return item[textProperty];
