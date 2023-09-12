@@ -59,6 +59,7 @@ class PlCombobox extends PlElement {
         :host {
             min-width: 0;
             flex-shrink: 0;
+            --pl-tag-max-width: 140px;
         }
 
         :host([hidden]) {
@@ -96,7 +97,7 @@ class PlCombobox extends PlElement {
             border-radius: 4px;
             width: auto;
             height: 20px;
-            max-width: 140px;
+            max-width: var(--pl-tag-max-width);
             padding: 0 4px;
             align-items: center;
         }
