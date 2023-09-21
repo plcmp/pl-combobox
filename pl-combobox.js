@@ -155,7 +155,7 @@ class PlCombobox extends PlElement {
         </div>
     `;
     static template = html`
-        <pl-input content-width="[[contentWidth]]" label-width="[[labelWidth]]" stretch="[[stretch]]" readonly="[[readonly]]"
+        <pl-input exportparts="labeled-container,label,input-container,native-input" content-width="[[contentWidth]]" label-width="[[labelWidth]]" stretch="[[stretch]]" readonly="[[readonly]]"
             disabled="{{disabled}}" id="input" placeholder="[[_getPlaceholder(placeholder, valueList)]]" value="{{text}}" required="[[required]]"
             invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]" on-click="[[_onOpen]]">
             <slot name="prefix" slot="prefix"></slot>
