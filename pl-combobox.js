@@ -36,7 +36,7 @@ class PlCombobox extends PlElement {
         hidden: { type: Boolean, reflectToAttribute: true },
 
         allowCustomValue: { type: Boolean, value: false },
-        multiSelect: { type: Boolean, value: false, observer: '_multiSelectObserver' },
+        multiSelect: { type: Boolean, value: false, observer: '_multiSelectObserver', reflectToAttribute: true },
         valueList: { type: Array, value: () => [], observer: '_valueListObserver' },
         selectedList: { type: Array, value: () => [], observer: '_selectedListObserver' },
 
@@ -120,14 +120,12 @@ class PlCombobox extends PlElement {
             display: flex;
             flex-wrap: wrap;
             gap: 4px;
-            flex-shrink: 0;
         }
 
         .text-cont {
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
-            flex-shrink: 0;
         }
 
         .select-all {
@@ -138,6 +136,10 @@ class PlCombobox extends PlElement {
             position: sticky;
             top: 0px;
             z-index: 1;
+        }
+
+        :host([multi-select])::part(native-input) {
+            width: auto;
         }
     `;
     static tagsTemplate = html`
