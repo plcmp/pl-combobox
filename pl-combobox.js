@@ -125,6 +125,7 @@ class PlCombobox extends PlElement {
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .select-all {
