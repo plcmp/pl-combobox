@@ -24,7 +24,7 @@ class PlComboboxList extends PlElement {
             display: flex;
             flex-direction: column;
             overflow: auto;
-            max-height: var(--dropdown-max-height, 254px);
+            max-height: var(--pl-dropdown-max-height, 254px);
         }
 
         .comboitem {
@@ -36,24 +36,23 @@ class PlComboboxList extends PlElement {
             align-items: center;
             cursor: pointer;
 
-            padding: 2px var(--space-sm);
-            font: var(--text-font);
-            color: var(--text-color);
+            padding: 0px calc(var(--pl-base-size) / 4);
+            font: var(--pl-text-font);
+            color: var(--pl-text-color);
         }
 
         .comboitem:hover {
-            background-color: var(--grey-lightest)
+            background-color: var(--pl-primary-lightest)
         }
 
         .text {
             display: flex;
-            min-height: var(--base-size-md);
+            min-height: var(--pl-base-size);
             width: 100%;
             align-text: center;
             align-items: center;
         }
     `;
-
 
     static plainTemplate = html`
         <div class="comboitem" on-click="[[_onSelect]]" d:repeat="{{_vdata}}">

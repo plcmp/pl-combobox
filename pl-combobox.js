@@ -79,25 +79,35 @@ class PlCombobox extends PlElement {
         }
 
         pl-dropdown {
-            background: var(--surface-color);
-            border-radius: var(--border-radius);
+            background: var(--pl-surface-color);
+            border-radius: var(--pl-border-radius);
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            border: 1px solid var(--grey-light);
-            min-width: var(--content-width);
+            border: 1px solid var(--pl-grey-light);
+            min-width: var(--pl-content-width);
+            box-sizing: border-box;
+            padding: 0;
+        }
+
+        pl-dropdown::part(popover) {
+            background: var(--pl-surface-color);
+            border-radius: var(--pl-border-radius);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--pl-grey-light);
+            min-width: var(--pl-content-width);
             box-sizing: border-box;
             padding: 0;
         }
 
         .tag {
             display: flex;
-            background: var(--primary-lightest);
+            background: var(--pl-primary-lightest);
             box-sizing: border-box;
-            border: 1px solid var(--primary-light);
-            border-radius: 4px;
+            border: 1px solid var(--pl-primary-light);
+            border-radius: var(--pl-border-radius);
             width: auto;
             height: 20px;
             max-width: var(--pl-tag-max-width, 140px);
-            padding: 0 4px;
+            padding: 0 var(--pl-space-xs);;
             align-items: center;
         }
 
@@ -106,7 +116,7 @@ class PlCombobox extends PlElement {
         }
 
         .tag:last-child {
-            margin-right: 2px;
+            margin-right: var(--pl-space-xxs);
         }
 
         .tag-text {
@@ -126,15 +136,19 @@ class PlCombobox extends PlElement {
             white-space: nowrap;
             overflow: hidden;
             flex-shrink: 0;
+            font: var(--pl-text-font);
+            color: var(--pl-text-color);
+            width: 100%;
+            text-align: start;
         }
 
         .select-all {
             box-sizing:border-box;
-            padding: 0px 8px;
-            background: var(--grey-lightest);
-            border-bottom: 1px solid var(--grey-base);
+            padding: 0px var(--pl-space-sm);
+            background: var(--pl-grey-lightest);
+            border-bottom: 1px solid var(--pl-grey-base);
             position: sticky;
-            top: 0px;
+            top: 0;
             z-index: 1;
         }
     `;
