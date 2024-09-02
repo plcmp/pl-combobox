@@ -47,6 +47,8 @@ class PlCombobox extends PlElement {
 
         selectOnlyLeaf: { type: Boolean, value: false },
 
+        autocomplete: { type: Boolean, value: false },
+
         _filteredData: { type: Array, value: () => [] },
         _vdata: { type: Array, value: () => [] },
         _openedForDomIf: { type: Boolean, value: false },
@@ -167,7 +169,7 @@ class PlCombobox extends PlElement {
         </div>
     `;
     static template = html`
-        <pl-input exportparts="labeled-container,label,input-container,native-input" content-width="[[contentWidth]]" label-width="[[labelWidth]]" stretch="[[stretch]]" readonly="[[readonly]]"
+        <pl-input exportparts="labeled-container,label,input-container,native-input" content-width="[[contentWidth]]" label-width="[[labelWidth]]" stretch="[[stretch]]" readonly="[[readonly]]" autocomplete="[[autocomplete]]"
             disabled="{{disabled}}" id="input" placeholder="[[_getPlaceholder(placeholder, valueList)]]" value="{{text}}" required="[[required]]"
             invalid="{{invalid}}" label="[[label]]" orientation="[[orientation]]" on-click="[[_onOpen]]">
             <slot name="prefix" slot="prefix"></slot>
