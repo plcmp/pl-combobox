@@ -164,7 +164,7 @@ class PlCombobox extends PlElement {
     `;
 
     static textTemplate = html`
-        <div slot="input" class="text-cont" title$=[[_getTitleForMulti(selectedList)]]>
+        <div slot="input" class="text-cont" title$=[[_getTitleForMulti(selectedList)]] hidden$=[[_isEmptyList(selectedList.length)]]]>>
             [[_getTextForMulti(selectedList)]]
         </div>
     `;
@@ -214,6 +214,10 @@ class PlCombobox extends PlElement {
         } else {
             this.splice('valueList', 0, this.valueList.length, ...this.data.map(x => x[this.valueProperty]));
         }
+    }
+
+    _isEmptyList(length) {
+        return length == 0;
     }
 
     connectedCallback() {
