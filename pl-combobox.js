@@ -320,7 +320,7 @@ class PlCombobox extends PlElement {
     }
 
     _onOpen() {
-        if (!this.readonly && !this.disabled) {
+        if (!this.readonly && !this.disabled && this.data.length > 0) {
             this._openedForDomIf = true;
             this.$.dd.open(this.$.input.$.inputContainer, this.fitInto);
             this.$.dd.style.minWidth = this.$.input.$.inputContainer.offsetWidth + 'px';
